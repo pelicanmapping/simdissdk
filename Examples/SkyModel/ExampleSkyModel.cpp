@@ -94,8 +94,14 @@ struct AppData
   void applyAmbient()
   {
     float mag = ambient->getValue();
+
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+    if (sceneManager->getSkyNode() != NULL)
+      sceneManager->getSkyNode()->getSunLight()->setAmbient(osg::Vec4f(mag, mag, mag, 1.f));
+#else
     if (sceneManager->getSkyNode() != NULL)
       sceneManager->getSkyNode()->setMinimumAmbient(osg::Vec4f(mag, mag, mag, 1.f));
+#endif
   }
 
   /** Changes the current sky model */
@@ -183,7 +189,11 @@ private:
   /** Given a Config, creates a Sky node */
   osgEarth::Util::SkyNode* createSky_(const osgEarth::Config& options)
   {
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+    return osgEarth::Util::SkyNode::create(ConfigOptions(options));
+#else
     return osgEarth::Util::SkyNode::create(ConfigOptions(options), sceneManager->getMapNode());
+#endif
   }
 
   /** Given a Config, creates and attaches a sky node */

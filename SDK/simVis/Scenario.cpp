@@ -218,6 +218,8 @@ int ScenarioManager::SimpleEntityGraph::clear()
 
 // -----------------------------------------------------------------------
 
+#if OSGEARTH_VERSION_LESS_THAN(3,0,0)
+
 ScenarioManager::GeoGraphEntityGraph::GeoGraphEntityGraph(const ScenarioDisplayHints& hints)
   : hints_(hints),
   group_(new osg::Group),
@@ -263,6 +265,8 @@ int ScenarioManager::GeoGraphEntityGraph::clear()
   group_->addChild(graph_);
   return 0;
 }
+
+#endif
 
 // -----------------------------------------------------------------------
 

@@ -62,7 +62,7 @@ static const float POS_WIND_ANGLE_Y = -69.f;
 static const osgText::TextBase::AlignmentType ALIGN_WIND_ANGLE = osgText::TextBase::CENTER_TOP;
 
 /** Color of the (normally red) line pointing to current compass position */
-static const osg::Vec4f POINTING_LINE_COLOR(osgEarth::Symbology::Color::Red);
+static const osg::Vec4f POINTING_LINE_COLOR(simVis::Color::Red);
 /** Minimum and maximum Y values for the pointing line */
 static const float POS_POINTING_MIN_Y = 39.f;
 static const float POS_POINTING_MAX_Y = 52.f;
@@ -146,7 +146,7 @@ void CompassNode::initCompass_(const std::string& compassFilename)
   valueText_->setFont(simVis::Registry::instance()->getOrCreateFont(COMPASS_FONT));
   valueText_->setAlignment(ALIGN_COMPASS);
   valueText_->setAxisAlignment(osgText::TextBase::SCREEN);
-  valueText_->setBackdropColor(osgEarth::Symbology::Color::Black);
+  valueText_->setBackdropColor(simVis::Color::Black);
   valueText_->setDataVariance(osg::Object::DYNAMIC);
   valueText_->setPosition(osg::Vec3f(POS_COMPASS_X, POS_COMPASS_Y, 0.f));
   // Without this, text goes into a depth sorted bin, and might draw on top of things it shouldn't
@@ -205,7 +205,7 @@ void CompassNode::initWindVane_()
   windSpeedText_->setFont(simVis::Registry::instance()->getOrCreateFont(COMPASS_FONT));
   windSpeedText_->setAlignment(ALIGN_WIND_SPEED);
   windSpeedText_->setAxisAlignment(osgText::TextBase::SCREEN);
-  windSpeedText_->setBackdropColor(osgEarth::Symbology::Color::Black);
+  windSpeedText_->setBackdropColor(simVis::Color::Black);
   windSpeedText_->setDataVariance(osg::Object::DYNAMIC);
   windSpeedText_->setPosition(osg::Vec3f(POS_WIND_SPEED_X, POS_WIND_SPEED_Y, 0.f));
   // Without this, text goes into a depth sorted bin, and might draw on top of things it shouldn't

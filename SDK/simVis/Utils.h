@@ -44,7 +44,13 @@
 #include "osgEarth/Units"
 #include "osgEarth/Registry"
 #include "osgEarth/ShaderFactory"
+#include "osgEarth/Version"
+
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+#include "osgEarth/Color"
+#else
 #include "osgEarthSymbology/Color"
+#endif
 
 // MACROS to test for changes in protobuf properties.
 

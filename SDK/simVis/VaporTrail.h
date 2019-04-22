@@ -24,11 +24,11 @@
 #include <map>
 #include <vector>
 #include "osg/ref_ptr"
+#include "osg/Geode"
 #include "osg/MatrixTransform"
 #include "simCore/Common/Export.h"
 
 namespace osg {
-  class Geode;
   class Group;
   class Texture2D;
 }

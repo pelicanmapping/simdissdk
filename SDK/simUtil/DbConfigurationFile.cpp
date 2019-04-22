@@ -23,9 +23,15 @@
 #include <sstream>
 #include "osgDB/FileUtils"
 #include "osgDB/FileNameUtils"
+#include "osgEarth/Version"
 #include "osgEarth/Map"
 #include "osgEarth/ImageLayer"
-#include "osgEarthDrivers/engine_rex/RexTerrainEngineOptions"
+
+#if OSGEARTH_VERSION_LESS_THAN(3,0,0)
+  #include "osgEarthDrivers/engine_rex/RexTerrainEngineOptions"
+#else
+  #include "osgEarth/TerrainOptions"
+#endif
 
 #include "simNotify/Notify.h"
 #include "simCore/Common/Exception.h"
@@ -40,6 +46,10 @@
 #include "simVis/SceneManager.h"
 #include "simVis/Utils.h"
 #include "simUtil/DbConfigurationFile.h"
+
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+#include "simVis/DBFormat.h"
+#endif
 
 namespace simUtil {
 
@@ -108,10 +118,15 @@ int DbConfigurationFile::load(osg::ref_ptr<osgEarth::MapNode>& mapNode, const st
     SAFETRYBEGIN;
     osg::ref_ptr<osgEarth::Map> map = simUtil::DbConfigurationFile::loadLegacyConfigFile(adjustedConfigFile, quiet);
 
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+    mapNode = new osgEarth::MapNode(map.get());
+    simVis::SceneManager::initializeTerrainOptions(mapNode);
+#else
     // Set up a map node with the supplied options
     osgEarth::Drivers::RexTerrainEngine::RexTerrainEngineOptions options;
     simVis::SceneManager::initializeTerrainOptions(options);
     mapNode = new osgEarth::MapNode(map.get(), options);
+#endif
 
     SAFETRYEND((std::string("legacy SIMDIS 9 .txt processing of file ") + configFile));
   }
@@ -364,27 +379,47 @@ void DbConfigurationFile::parseLayers_(const std::vector<std::string>& tokens, o
 
         if (textureSet)
         {
+          // Pull out the deepest level.  It is not the same as maximum level from the layer options.
+          const std::string deepestLevelStr = DbConfigurationFile::findTokenValue_(tokens, deepest_keyword);
+          unsigned int deepestLevel;
+          bool deepestLevelValid = 
+            (!deepestLevelStr.empty() && simCore::isValidNumber(deepestLevelStr, deepestLevel));
+
+          // process min and max level
+          const std::string shallowLevelStr = DbConfigurationFile::findTokenValue_(tokens, shallowest_keyword);
+          unsigned int shallowestLevel;
+          bool minLevelValid = (!shallowLevelStr.empty() && simCore::isValidNumber(shallowLevelStr, shallowestLevel));
+
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+
+          simVis::DBImageLayer* imageLayer = new simVis::DBImageLayer();
+          imageLayer->setURL(fullDbFileName);
+          if (deepestLevelValid)
+            imageLayer->setDeepestLevel(deepestLevel);
+          if (minLevelValid)
+            imageLayer->setMinLevel(getOsgEarthLevel_(shallowestLevel));
+
+
+#else
+
           osgEarth::Config config;
           config.setReferrer(filePath);
           config.key() = "image";
           simVis::DBOptions layerDriver(config);
           layerDriver.url() = fullDbFileName;
 
-          // Pull out the deepest level.  It is not the same as maximum level from the layer options.
-          const std::string deepestLevelStr = DbConfigurationFile::findTokenValue_(tokens, deepest_keyword);
-          unsigned int deepestLevel;
-          if (!deepestLevelStr.empty() && simCore::isValidNumber(deepestLevelStr, deepestLevel))
+          if (deepestLevelValid)
             layerDriver.deepestLevel() = deepestLevel;
+
+          if (minLevelValid)
+            layerDriver.minLevel() = getOsgEarthLevel_(shallowestLevel);
 
           osgEarth::ImageLayerOptions options(layerName, layerDriver);
 
-          // process min and max level
-          const std::string shallowLevelStr = DbConfigurationFile::findTokenValue_(tokens, shallowest_keyword);
-          unsigned int shallowestLevel;
-          if (!shallowLevelStr.empty() && simCore::isValidNumber(shallowLevelStr, shallowestLevel))
-            options.minLevel() = getOsgEarthLevel_(shallowestLevel);
-
           osgEarth::ImageLayer* imageLayer = new osgEarth::ImageLayer(options);
+
+#endif
+
           imageLayer->setOpacity(opacity);
           imageLayer->setVisible(active);
 #if SDK_OSGEARTH_MIN_VERSION_REQUIRED(1,8,0)
@@ -398,6 +433,23 @@ void DbConfigurationFile::parseLayers_(const std::vector<std::string>& tokens, o
         }
         if (altitudeSet)
         {
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+
+          simVis::DBElevationLayer* newLayer = new simVis::DBElevationLayer();
+          newLayer->setURL(fullDbFileName);
+
+          // add a no data value to elevation layers, default is 0
+          float noDataValue = 0.0f;
+          std::string noDataValueStr = DbConfigurationFile::findTokenValue_(tokens, noDataValue_keyword);
+          if (!noDataValueStr.empty())
+          {
+            std::istringstream iStr(noDataValueStr);
+            iStr >> noDataValue;
+          }
+          newLayer->setNoDataValue(noDataValue);
+
+#else
+
           osgEarth::Config config;
           config.setReferrer(filePath);
           config.key() = "elevation";
@@ -421,12 +473,15 @@ void DbConfigurationFile::parseLayers_(const std::vector<std::string>& tokens, o
 #endif
           osgEarth::ElevationLayer* newLayer = new osgEarth::ElevationLayer(layerOptions);
           // elevation layers in a .txt file by convention are ordered in reverse of osgEarth stacking priority
+
 #if SDK_OSGEARTH_MIN_VERSION_REQUIRED(1,6,0)
           map->addLayer(newLayer);
           map->moveLayer(newLayer, 0);
 #else
           map->addElevationLayer(newLayer);
           map->moveElevationLayer(newLayer, 0);
+#endif
+
 #endif
         }
       }
@@ -448,6 +503,15 @@ void DbConfigurationFile::parseCloudLayers_(const std::vector<std::string>& toke
     const std::string fullDbFileName = DbConfigurationFile::getDbFile_(tokens, filePath);
     if (!fullDbFileName.empty())
     {
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+
+      simVis::DBImageLayer* imageLayer = new simVis::DBImageLayer();
+      imageLayer->setURL(fullDbFileName);
+      const std::string layerName = osgDB::getStrippedName(fullDbFileName);
+      imageLayer->setName(layerName);
+
+#else
+
       // create the layer driver with the url
       osgEarth::Config config;
       config.setReferrer(filePath);
@@ -458,6 +522,8 @@ void DbConfigurationFile::parseCloudLayers_(const std::vector<std::string>& toke
       const std::string layerName = osgDB::getStrippedName(fullDbFileName);
       const osgEarth::ImageLayerOptions options(layerName, layerDriver);
       osgEarth::ImageLayer* imageLayer = new osgEarth::ImageLayer(options);
+
+#endif
       imageLayer->setVisible(false);
 #if SDK_OSGEARTH_MIN_VERSION_REQUIRED(1,8,0)
       imageLayer->setEnabled(false);
@@ -544,11 +610,16 @@ std::string DbConfigurationFile::findTokenValue_(const std::vector<std::string>&
 osgEarth::Map* DbConfigurationFile::createDefaultMap_()
 {
   // configure an EGM96 MSL globe.for the Map
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+  osgEarth::Map* map = new osgEarth::Map();
+  map->setProfile(osgEarth::Profile::create("wgs84", "egm96"));
+#else
   osgEarth::ProfileOptions profileOptions;
-  profileOptions.vsrsString() = "egm96-meters";
+  profileOptions.vsrsString() = "egm96";
   osgEarth::MapOptions mapOptions;
   mapOptions.profile() = profileOptions;
   osgEarth::Map* map = new osgEarth::Map(mapOptions);
+#endif
   return map;
 }
 
@@ -557,6 +628,25 @@ osg::Node* DbConfigurationFile::readEarthFile(std::istream& istream, const std::
   osg::ref_ptr<osgDB::ReaderWriter> readWrite = osgDB::Registry::instance()->getReaderWriterForExtension("earth");
   if (!readWrite.valid())
     return NULL;
+
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+
+  osg::ref_ptr<osgDB::Options> dbOptions = new osgDB::Options();
+  dbOptions->setDatabasePath(relativeTo);
+  dbOptions->setPluginStringData("osgEarth::URIContext::referrer", relativeTo);
+  
+  osgDB::ReaderWriter::ReadResult result = readWrite->readNode(istream, dbOptions.get());
+
+  if (result.success())
+  {
+    osgEarth::MapNode* mapNode = osgEarth::MapNode::get(result.getNode());
+    if (mapNode)
+    {
+      simVis::SceneManager::initializeTerrainOptions(mapNode);
+    }
+  }
+
+#else
 
   osgEarth::MapNodeOptions defaults;
   // Fill out a RexTerrainEngineOptions with default options
@@ -573,6 +663,9 @@ osg::Node* DbConfigurationFile::readEarthFile(std::istream& istream, const std::
 
   // Pass those defaults into osgDB::readNodeFile()
   osgDB::ReaderWriter::ReadResult result = readWrite->readNode(istream, dbOptions.get());
+
+#endif
+
   return result.takeNode();
 }
 

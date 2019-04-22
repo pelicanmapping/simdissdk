@@ -28,11 +28,11 @@
 #include <string>
 #include "simCore/Common/Common.h"
 #include "simCore/Calc/Coordinate.h"
+#include "simVis/Types.h"
 #include "simVis/GOG/GOGNode.h"
 #include "simVis/GOG/GOGRegistry.h"
 #include "osgEarth/MapNode"
 #include "osgEarthSymbology/Style"
-#include "osgEarthSymbology/Color"
 
 namespace simCore { class UnitsRegistry; }
 
@@ -180,7 +180,7 @@ namespace simVis { namespace GOG
     * @param[in ] key   GOG key like color1, color2, red, black,...
     * @param[in ] color The color to use for the given key
     */
-    void addOverwriteColor(const std::string& key, osgEarth::Symbology::Color color);
+    void addOverwriteColor(const std::string& key, simVis::Color color);
 
     /**
      * Parses an input GOG stream into a vector of ParsedShape entries, and a parallel vector of GogMetaData.
@@ -205,10 +205,10 @@ namespace simVis { namespace GOG
     void initGogColors_();
 
     /**
-     * Converts an GOG color into an HTML osgEarth::Color
+     * Converts an GOG color into an HTML simVis::Color
      * @param[in ] c     GOG color
      * @param[in ] isHex If true than c is in Hex
-     * @return GOG color into an HTML osgEarth::Color
+     * @return GOG color into an HTML simVis::Color
      */
     std::string parseGogColor_(const std::string& c, bool isHex) const;
 
@@ -250,7 +250,7 @@ namespace simVis { namespace GOG
     GOGRegistry                          registry_;
     GOGContext                           context_;
     osgEarth::Symbology::Style           style_;
-    std::map<std::string, osgEarth::Symbology::Color> colors_; // Key is GOG color like color1, color2
+    std::map<std::string, simVis::Color> colors_; // Key is GOG color like color1, color2
   };
 
 } } // namespace simVis::GOG

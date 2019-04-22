@@ -20,3 +20,7 @@ vsi_install_target(example_periscope SDK_Examples)
 if(OSGEARTH_TRITON_SUPPORT STREQUAL NODEKIT)
     target_link_libraries(example_periscope PRIVATE OSGEARTH_TRITON)
 endif()
+if (OSGEARTH_SILVERLINING_SUPPORT STREQUAL NODEKIT)
+    target_link_libraries(example_periscope PRIVATE OSGEARTH_SILVERLINING)
+endif()
+

@@ -121,7 +121,6 @@ ElevationQueryProxy::ElevationQueryProxy(const osgEarth::Map* map, osg::Group* s
     scene_(scene)
 {
   data_ = new PrivateData();
-  mapf_.setMap(map);
   query_ = new osgEarth::ElevationQuery(map);
 
 #if SDK_OSGEARTH_VERSION_LESS_THAN(1,6,0)
@@ -177,15 +176,19 @@ bool ElevationQueryProxy::getElevationFromPool_(const osgEarth::GeoPoint& point,
 // ElevationPool::getElevation was introduced in 3/2017 to the osgEarth API
 #if SDK_OSGEARTH_MIN_VERSION_REQUIRED(1,6,0)
 
+  osg::ref_ptr<const osgEarth::Map> map;
+  if (!map_.lock(map))
+    return false;
+
   unsigned int lod = 23u; // use reasonable default value, same as osgEarth::ElevationQuery
   if (desiredResolution > 0.0)
   {
-    int level = mapf_.getProfile()->getLevelOfDetailForHorizResolution(desiredResolution, 257);
+    int level = map->getProfile()->getLevelOfDetailForHorizResolution(desiredResolution, 257);
     if ( level > 0 )
         lod = level;
   }
 
-  data_->elevationResult_ = mapf_.getElevationPool()->getElevation(point, lod);
+  data_->elevationResult_ = map->getElevationPool()->getElevation(point, lod);
   // if blocking, get elevation result immediately
   if (blocking)
   {
@@ -242,7 +245,7 @@ void ElevationQueryProxy::setMap(const osgEarth::Map* map)
 
   delete query_;
   query_ = new osgEarth::ElevationQuery(map);
-  mapf_.setMap(map);
+  map_ = map;
 }
 
 void ElevationQueryProxy::setMapNode(const osgEarth::MapNode* mapNode)

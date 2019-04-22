@@ -21,10 +21,10 @@
 *
 */
 #include "osgEarth/GeoMath"
-#include "osgEarthSymbology/Color"
 #include "osgEarthAnnotation/LabelNode"
 #include "simCore/Calc/Angle.h"
 #include "simCore/Calc/CoordinateConverter.h"
+#include "simVis/Types.h"
 #include "simVis/CustomRendering.h"
 #include "simVis/Constants.h"
 #include "simVis/Utils.h"
@@ -38,8 +38,8 @@ namespace simUtil
 static const int GRAPHIC_MASK_RULERLINE = simVis::DISPLAY_MASK_GOG;
 static const float DEFAULT_LINEWIDTH = 2.0f;
 static const unsigned short DEFAULT_STIPPLE = 0xf00f;
-static const simVis::Color DEFAULT_LINECOLOR = osgEarth::Symbology::Color::Yellow;
-static const simVis::Color DEFAULT_TEXTCOLOR = osgEarth::Symbology::Color::White;
+static const simVis::Color DEFAULT_LINECOLOR = simVis::Color::Yellow;
+static const simVis::Color DEFAULT_TEXTCOLOR = simVis::Color::White;
 static const std::string DEFAULT_FONT = "arialbd.ttf";
 static const float DEFAULT_FONTSIZE = 14;
 
@@ -61,7 +61,7 @@ LineGraphic::LineGraphic(osg::Group* scene, osgEarth::MapNode* mapNode)
   // Set up the label node default style
   osg::ref_ptr<osgEarth::Symbology::TextSymbol> text = labelStyle_.getOrCreate<osgEarth::Symbology::TextSymbol>();
   text->fill()->color() = DEFAULT_TEXTCOLOR;
-  text->halo()->color() = osgEarth::Symbology::Color::Black;
+  text->halo()->color() = simVis::Color::Black;
   text->alignment() = osgEarth::Symbology::TextSymbol::ALIGN_CENTER_CENTER;
   text->haloOffset() = simVis::outlineThickness(simData::TO_THICK);
   osg::ref_ptr<osgEarth::Symbology::RenderSymbol> render = labelStyle_.getOrCreate<osgEarth::Symbology::RenderSymbol>();

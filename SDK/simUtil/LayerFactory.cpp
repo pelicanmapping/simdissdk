@@ -19,15 +19,46 @@
  * disclose, or release this software.
  *
  */
+#include "osgEarth/Version"
 #include "osgEarth/ImageLayer"
 #include "osgEarth/ElevationLayer"
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+#include "osgEarthFeatures/OGRFeatureSource"
+#else
 #include "osgEarthDrivers/feature_ogr/OGRFeatureOptions"
+#endif
 #include "osgEarthFeatures/FeatureModelLayer"
 #include "simCore/Common/Exception.h"
 #include "simVis/Constants.h"
+#include "simVis/Types.h"
 #include "simUtil/LayerFactory.h"
 
 namespace simUtil {
+
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+
+  osgEarth::ImageLayer* LayerFactory::newImageLayer(
+    const std::string& layerName,
+    const osgEarth::ConfigOptions& options,
+    const osgEarth::Profile* mapProfile,
+    const osgEarth::CachePolicy* cachePolicy)
+  {
+    SAFETRYBEGIN;
+    osg::ref_ptr<osgEarth::ImageLayer> layer = new osgEarth::ImageLayer(options);
+
+    if (cachePolicy)
+      layer->setCachePolicy(*cachePolicy);
+
+    layer->open();
+
+    return layer.release();
+
+    // Error encountered
+    SAFETRYEND("during LayerFactory::newImageLayer()");
+    return NULL;
+  }
+
+#else
 
 osgEarth::ImageLayer* LayerFactory::newImageLayer(
   const std::string& layerName,
@@ -62,7 +93,34 @@ osgEarth::ImageLayer* LayerFactory::newImageLayer(
   SAFETRYEND("during LayerFactory::newImageLayer()");
   return NULL;
 }
+#endif
 
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+osgEarth::ElevationLayer* LayerFactory::newElevationLayer(
+  const std::string& layerName,
+  const osgEarth::ConfigOptions& options,
+  const osgEarth::CachePolicy* cachePolicy,
+  const osgEarth::ConfigOptions* extraOptions)
+{
+  SAFETRYBEGIN;
+  osgEarth::ConfigOptions combined(options);
+  if (extraOptions)
+    combined.merge(*extraOptions);
+
+  osg::ref_ptr<osgEarth::ElevationLayer> layer = new osgEarth::ElevationLayer(combined);
+
+  if (cachePolicy)
+    layer->setCachePolicy(*cachePolicy);
+
+  layer->open();
+
+  return layer.release();
+
+  // Error encountered
+  SAFETRYEND("during LayerFactory::newElevationLayer()");
+  return NULL;
+}
+#else
 osgEarth::ElevationLayer* LayerFactory::newElevationLayer(
   const std::string& layerName,
   const osgEarth::TileSourceOptions& options,
@@ -101,8 +159,10 @@ osgEarth::ElevationLayer* LayerFactory::newElevationLayer(
   SAFETRYEND("during LayerFactory::newElevationLayer()");
   return NULL;
 }
+#endif
 
-osgEarth::Features::FeatureModelLayer* LayerFactory::newFeatureLayer(const osgEarth::Features::FeatureModelLayerOptions& options)
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+osgEarth::Features::FeatureModelLayer* LayerFactory::newFeatureLayer(const osgEarth::Features::FeatureModelLayer::Options& options)
 {
   SAFETRYBEGIN;
   osg::ref_ptr<osgEarth::Features::FeatureModelLayer> featureLayer = new osgEarth::Features::FeatureModelLayer(options);
@@ -115,6 +175,20 @@ osgEarth::Features::FeatureModelLayer* LayerFactory::newFeatureLayer(const osgEa
   SAFETRYEND("during LayerFactory::newFeatureLayer()");
   return NULL;
 }
+#else
+osgEarth::Features::FeatureModelLayer* LayerFactory::newFeatureLayer(const osgEarth::Features::FeatureModelLayerOptions& options)
+{
+  SAFETRYBEGIN;
+  osg::ref_ptr<osgEarth::Features::FeatureModelLayer> featureLayer = new osgEarth::Features::FeatureModelLayer(options);
+
+  // Return layer regardless of if open() succeeds
+  featureLayer->open();
+  return featureLayer.release();
+
+  // Error encountered
+  SAFETRYEND("during LayerFactory::newFeatureLayer()");
+  return NULL;
+#endif
 
 /////////////////////////////////////////////////////////////////
 
@@ -122,11 +196,11 @@ ShapeFileLayerFactory::ShapeFileLayerFactory()
   : style_(new osgEarth::Symbology::Style)
 {
   // Configure some defaults
-  setLineColor(osgEarth::Symbology::Color::Cyan);
+  setLineColor(simVis::Color::Cyan);
   setLineWidth(1.5f);
 
   // Configure the render symbol to render line shapes
-  osgEarth::RenderSymbol* rs = style_->getOrCreateSymbol<osgEarth::RenderSymbol>();
+  osgEarth::Symbology::RenderSymbol* rs = style_->getOrCreateSymbol<osgEarth::Symbology::RenderSymbol>();
   rs->depthTest() = false;
   rs->clipPlane() = simVis::CLIPPLANE_VISIBLE_HORIZON;
   rs->order()->setLiteral(simVis::BIN_GOG_FLAT);
@@ -139,11 +213,34 @@ ShapeFileLayerFactory::~ShapeFileLayerFactory()
 
 osgEarth::Features::FeatureModelLayer* ShapeFileLayerFactory::load(const std::string& url) const
 {
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+  osgEarth::Features::FeatureModelLayer* layer = new osgEarth::Features::FeatureModelLayer();
+  configureOptions(url, layer);
+  return layer;
+#else
   osgEarth::Features::FeatureModelLayerOptions layerOptions;
   configureOptions(url, layerOptions);
   return LayerFactory::newFeatureLayer(layerOptions);
+#endif
 }
 
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+void ShapeFileLayerFactory::configureOptions(const std::string& url, osgEarth::Features::FeatureModelLayer* layer) const
+{
+  // Configure the stylesheet that will be associated with the layer
+  osgEarth::Symbology::StyleSheet* stylesheet = new osgEarth::Symbology::StyleSheet;
+  stylesheet->addStyle(*style_);
+  layer->setStyleSheet(stylesheet);
+
+  osgEarth::Features::OGRFeatureSource* ogr = new osgEarth::Features::OGRFeatureSource();
+  ogr->setURL(url);
+  layer->setFeatureSource(ogr);
+
+  layer->setAlphaBlending(true);
+  layer->setEnableLighting(false);
+
+}
+#else
 void ShapeFileLayerFactory::configureOptions(const std::string& url, osgEarth::Features::FeatureModelLayerOptions& driver) const
 {
   osgEarth::Drivers::OGRFeatureOptions ogr;
@@ -158,22 +255,23 @@ void ShapeFileLayerFactory::configureOptions(const std::string& url, osgEarth::F
   driver.alphaBlending() = true;
   driver.enableLighting() = false;
 }
+#endif
 
 void ShapeFileLayerFactory::setLineColor(const osg::Vec4f& color)
 {
-  osgEarth::LineSymbol* ls = style_->getOrCreateSymbol<osgEarth::LineSymbol>();
+  osgEarth::Symbology::LineSymbol* ls = style_->getOrCreateSymbol<osgEarth::Symbology::LineSymbol>();
   ls->stroke()->color() = color;
 }
 
 void ShapeFileLayerFactory::setLineWidth(float width)
 {
-  osgEarth::LineSymbol* ls = style_->getOrCreateSymbol<osgEarth::LineSymbol>();
+  osgEarth::Symbology::LineSymbol* ls = style_->getOrCreateSymbol<osgEarth::Symbology::LineSymbol>();
   ls->stroke()->width() = width;
 }
 
 void ShapeFileLayerFactory::setStipple(unsigned short pattern, unsigned int factor)
 {
-  osgEarth::LineSymbol* ls = style_->getOrCreateSymbol<osgEarth::LineSymbol>();
+  osgEarth::Symbology::LineSymbol* ls = style_->getOrCreateSymbol<osgEarth::Symbology::LineSymbol>();
   ls->stroke()->stipplePattern() = pattern;
   ls->stroke()->stippleFactor() = factor;
 }

@@ -1107,7 +1107,11 @@ void View::setSceneManager(simVis::SceneManager* node)
   {
     Viewpoint oldVP = oldManip->getViewpoint();
     osg::ref_ptr<osg::Node> oldTetherNode;
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+    oldTetherNode = oldVP.getNode();
+#else
     oldVP.getNode(oldTetherNode);
+#endif
     oldManip->setTetherCallback(0L);
     simVis::EarthManipulator* newManip = new simVis::EarthManipulator();
     newManip->setName("Earth Manipulator");
@@ -1228,7 +1232,11 @@ void View::tetherCamera(osg::Node *node, const simVis::Viewpoint& vp, double dur
     if (realTether == NULL && vp.nodeIsSet())
     {
       osg::ref_ptr<osg::Node> oldTether;
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+      oldTether = vp.getNode();
+#else
       vp.getNode(oldTether);
+#endif
       simCore::Vec3 lla = simVis::computeNodeGeodeticPosition(oldTether.get());
       newVp.focalPoint()->set(osgEarth::SpatialReference::create("wgs84"),
         osg::Vec3d(lla.lon() * simCore::RAD2DEG, lla.lat() * simCore::RAD2DEG, lla.alt()),
@@ -1248,8 +1256,13 @@ osg::Node* View::getCameraTether() const
   {
     Viewpoint vp = manip->getViewpoint();
     osg::ref_ptr<osg::Node> node;
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+    node = vp.getNode();
+    result = node.release();
+#else
     if (vp.getNode(node))
       result = node.release();
+#endif
   }
   return result;
 }
@@ -1377,7 +1390,11 @@ simVis::Viewpoint View::getViewpoint() const
       else if (manipViewpoint.nodeIsSet())
       {
         osg::ref_ptr<osg::Node> tether;
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+        tether = manipViewpoint.getNode();
+#else
         manipViewpoint.getNode(tether);
+#endif
         vp.setNode(tether.get());
       }
       else
@@ -1638,7 +1655,11 @@ void View::enableWatchMode(osg::Node* watched, osg::Node* watcher)
         if (manip && manip->isTethering())
         {
           osg::ref_ptr<osg::Node> tetherNode;
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+          tetherNode = manip->getViewpoint().getNode();
+#else
           manip->getViewpoint().getNode(tetherNode);
+#endif
           simVis::Viewpoint untether;
           untether.setNode(NULL);
           // Set a focal point to force a clear-out of the node; this will get updated to a better place in updateWatchView_()

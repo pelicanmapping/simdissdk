@@ -61,7 +61,6 @@ namespace simVis
     // Virtual destructor for virtual functions
     virtual ~DBOptions() {}
 
-  protected:
     /// get the current configuration
     // (override from osgEarth::TileSourceOptions)
     virtual osgEarth::Config getConfig() const
@@ -76,6 +75,7 @@ namespace simVis
 #endif
       return conf;
     }
+  protected:
 
     /// add in the settings from 'conf' to current
     // (override from osgEarth::TileSourceOptions)

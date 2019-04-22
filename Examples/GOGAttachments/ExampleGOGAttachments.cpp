@@ -62,6 +62,7 @@
 #include "simUtil/ExampleResources.h"
 
 #include "osg/Switch"
+#include "osgEarth/Version"
 #include "osgEarth/StringUtils"
 #include "osgEarthSymbology/Style"
 #include "osgEarthUtil/Sky"
@@ -493,7 +494,11 @@ int main(int argc, char **argv)
 
   // add a sky to the scene.
   osg::ref_ptr<simVis::SceneManager> scene = viewer->getSceneManager();
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+  osg::ref_ptr<SkyNode> sky = SkyNode::create();
+#else
   osg::ref_ptr<SkyNode> sky = SkyNode::create(scene->getMapNode());
+#endif
   sky->attach(viewer->getMainView());
   sky->setDateTime(osgEarth::Util::DateTime(2011, 10, 1, 10.0));
   scene->getScenario()->addChild(sky);

@@ -27,6 +27,7 @@
  */
 #include "osgEarth/Map"
 #include "osgEarth/ImageLayer"
+#include "osgEarth/Version"
 #include "simCore/Common/Version.h"
 #include "simCore/Common/HighPerformanceGraphics.h"
 #include "simUtil/ExampleResources.h"
@@ -34,6 +35,11 @@
 #include "simVis/DBOptions.h"
 #include "simVis/osgEarthVersion.h"
 #include "simUtil/ExampleResources.h"
+
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+#include "osgEarthUtil/DebugImageLayer"
+#include "simVis/DBFormat.h"
+#endif
 
 int main(int argc, char** argv)
 {
@@ -54,12 +60,16 @@ int main(int argc, char** argv)
     if (token == "--debug")
     {
       // Add the debug driver
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+      map->addLayer(new osgEarth::Util::DebugImageLayer());
+#else
       simVis::DBOptions driverOptions;
       driverOptions.setDriver("debug");
 #if SDK_OSGEARTH_MIN_VERSION_REQUIRED(1,6,0)
       map->addLayer(new osgEarth::ImageLayer("debug", driverOptions));
 #else
       map->addImageLayer(new osgEarth::ImageLayer("debug", driverOptions));
+#endif
 #endif
 
       // advance the token
@@ -79,6 +89,23 @@ int main(int argc, char** argv)
       token = argv[i];
     }
 
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+
+    if (isElevation)
+    {
+      //simVis::DBElevationLayer* layer = new simVis::DBElevationLayer();
+      //layer->setURL(token);
+      //map->addLayer(layer);
+    }
+    else
+    {
+      simVis::DBImageLayer* layer = new simVis::DBImageLayer();
+      layer->setURL(token);
+      map->addLayer(layer);
+    }
+
+#else
+
     simVis::DBOptions driverOptions;
     driverOptions.url() = token;
 
@@ -92,6 +119,8 @@ int main(int argc, char** argv)
       map->addElevationLayer(new osgEarth::ElevationLayer(token, driverOptions));
     else
       map->addImageLayer(new osgEarth::ImageLayer(token, driverOptions));
+#endif
+
 #endif
   }
 

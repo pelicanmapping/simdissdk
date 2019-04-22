@@ -19,8 +19,13 @@
  * disclose, or release this software.
  *
  */
+#include "osgEarth/Version"
 #include "osgEarthUtil/Controls"
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+#include "osgEarth/Color"
+#else
 #include "osgEarthSymbology/Color"
+#endif
 #include "osgEarthAnnotation/LabelNode"
 
 #include "osgEarth/ScreenSpaceLayout"

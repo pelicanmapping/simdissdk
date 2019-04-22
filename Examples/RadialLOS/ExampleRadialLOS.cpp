@@ -40,9 +40,9 @@
 #include "osgEarthUtil/Controls"
 #include "osgEarthSymbology/Geometry"
 #include "osgEarthFeatures/Feature"
-#include "osgEarthAnnotation/AnnotationEditing"
 #include "osgEarthAnnotation/FeatureNode"
 #include "osgEarthAnnotation/LocalGeometryNode"
+#include "osgEarthAnnotation/Draggers"
 
 //----------------------------------------------------------------------------
 
@@ -131,7 +131,12 @@ namespace
         {
           p2pFeature->setNodeMask(~0);
           p2pFeature->getFeature()->getGeometry()->back() = p.vec3d();
+
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+          p2pFeature->dirty();
+#else
           p2pFeature->init();
+#endif
 
           if (visible)
             p2p_result->setText("visible");
@@ -240,6 +245,7 @@ namespace
   };
 
 
+#if 0 // GW: replace with a simple dragger later
   /**
    * Creates the crosshairs that you can position to calculate a line of sight
    */
@@ -285,7 +291,7 @@ namespace
     osg::ref_ptr<osgEarth::Symbology::LineString> p2pLine = new osgEarth::Symbology::LineString();
     p2pLine->push_back(osg::Vec3d(RLOS_LON, RLOS_LAT, RLOS_ALT));
     p2pLine->push_back(osg::Vec3d(RLOS_LON, RLOS_LAT, RLOS_ALT));
-    style.getOrCreate<osgEarth::AltitudeSymbol>()->technique() == osgEarth::AltitudeSymbol::TECHNIQUE_DRAPE;
+    style.getOrCreate<osgEarth::Symbology::AltitudeSymbol>()->technique() == osgEarth::Symbology::AltitudeSymbol::TECHNIQUE_DRAPE;
     osg::ref_ptr<osgEarth::Features::Feature> feature = new osgEarth::Features::Feature(p2pLine.get(), mapNode->getMapSRS(), style);
     app->p2pFeature = new osgEarth::Annotation::FeatureNode(feature.get());
     app->p2pFeature->setMapNode(mapNode);
@@ -295,6 +301,7 @@ namespace
 
     return editor;
   }
+#endif
 }
 
 //----------------------------------------------------------------------------
@@ -335,7 +342,7 @@ int main(int argc, char **argv)
   scene->getScenario()->addChild(app.los);
 
   // Create a cursor for positioning a P2P LOS test:
-  scene->getScenario()->addChild(createP2PGraphics(&app, scene->getMapNode()));
+  //scene->getScenario()->addChild(createP2PGraphics(&app, scene->getMapNode()));
 
   // set the initial eye point
   viewer->getMainView()->setViewpoint(

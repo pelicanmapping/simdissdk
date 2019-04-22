@@ -54,10 +54,19 @@
 #include "simVis/OverheadMode.h"
 #include "simUtil/ExampleResources.h"
 
+#include "osgEarth/Version"
+
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+#include "osgEarth/TMS"
+#else
 #include "osgEarthDrivers/tms/TMSOptions"
+#endif
+
 #ifdef HAVE_TRITON_NODEKIT
 #include "osgEarthTriton/TritonLayer"
+#if OSGEARTH_VERSION_LESS_THAN(3,0,0)
 #include "osgEarthTriton/TritonOptions"
+#endif
 #include "simUtil/TritonSettings.h"
 #endif
 
@@ -72,8 +81,16 @@
 #include "simUtil/SilverLiningSettings.h"
 #endif
 #include "osgEarthUtil/Sky"
+
+#if OSGEARTH_VERSION_LESS_THAN(3,0,0)
 #include "osgEarthUtil/Ocean"
+#endif
+
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+#include "osgEarth/MBTiles"
+#else
 #include "osgEarthDrivers/mbtiles/MBTilesOptions"
+#endif
 
 #include "osg/Depth"
 
@@ -84,8 +101,11 @@
 #define PLATFORM_SHIP "Ship"
 
 using namespace osgEarth::Util;
+
+#if OSGEARTH_VERSION_LESS_THAN(3,0,0)
 using namespace osgEarth::Drivers;
 namespace osgEarth { namespace Triton { class TritonLayer; } }
+#endif
 
 static simCore::Coordinate s_shipPosOri(simCore::COORD_SYS_LLA,
                                         simCore::Vec3(simCore::DEG2RAD*(LAT), simCore::DEG2RAD*(LON), ALT),
@@ -762,6 +782,17 @@ namespace
       skyOptions.drawClouds() = true;
       skyOptions.cloudsMaxAltitude() = 100000.0;
 
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+#ifdef HAVE_SILVERLINING_NODEKIT
+      s_SlSettings->lensFlare()->set(true);
+
+      // Configure clouds with the SilverLining callback settings
+      s_SlSettings->addValue(s_CloudManager.get());
+      return new SilverLining::SilverLiningNode(skyOptions, s_SlSettings.get());
+#else
+      return SkyNode::create(skyOptions);
+#endif /* HAVE_SILVERLINING_NODEKIT */
+#else
 #ifdef HAVE_SILVERLINING_NODEKIT
       s_SlSettings->lensFlare()->set(true);
 
@@ -771,15 +802,33 @@ namespace
 #else
       return SkyNode::create(ConfigOptions(skyOptions), scene->getMapNode());
 #endif /* HAVE_SILVERLINING_NODEKIT */
+#endif
     }
+
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+    return SkyNode::create();
+#else
     Config skyOptions;
     skyOptions.set("driver", "simple");
     return SkyNode::create(ConfigOptions(skyOptions), scene->getMapNode());
+#endif
   }
 
 #ifdef HAVE_TRITON_NODEKIT
   osgEarth::Triton::TritonLayer* makeTriton(const std::string& tritonUser = "", const std::string& tritonLicense = "", const std::string& resourcePath = "")
   {
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+    osgEarth::Triton::TritonLayer* rv = new osgEarth::Triton::TritonLayer();
+    rv->setUserName(tritonUser);
+    rv->setLicenseCode(tritonLicense);
+    rv->setResourcePath(resourcePath);
+    rv->setUseHeightMap(false);
+    rv->setMaxAltitude(30000.0f);
+    rv->setRenderBinNumber(simVis::BIN_OCEAN);
+    rv->setOpacity(0.8f);
+    simVis::OverheadMode::configureOceanLayer(rv);
+    return rv;
+#else
     osgEarth::Triton::TritonOptions triton;
     if (!tritonUser.empty())
       triton.user() = tritonUser;
@@ -801,6 +850,7 @@ namespace
     rv->setOpacity(0.8f);
     simVis::OverheadMode::configureOceanLayer(rv);
     return rv;
+#endif
   }
 
 #endif
@@ -808,6 +858,16 @@ namespace
   /** Factory an ocean node */
   osgEarth::Util::SimpleOceanLayer* makeSimpleOcean()
   {
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+    osgEarth::Util::SimpleOceanLayer* ocean = new osgEarth::Util::SimpleOceanLayer();
+    ocean->setUseBathymetry(false);
+    ocean->setMaxAltitude(30000.0f);
+    ocean->setOpacity(0.8f);
+    osg::StateSet* stateSet = ocean->getOrCreateStateSet();
+    stateSet->setRenderBinDetails(simVis::BIN_OCEAN, simVis::BIN_GLOBAL_SIMSDK);
+    stateSet->setDefine("SIMVIS_IGNORE_BATHYMETRY_GEN");
+    return ocean;
+#else
 #if SDK_OSGEARTH_VERSION_LESS_THAN(1,10,0)
     osgEarth::Drivers::SimpleOcean::SimpleOceanOptions ocean;
     ocean.lowFeatherOffset() = 0.0f;
@@ -826,6 +886,7 @@ namespace
     stateSet->setRenderBinDetails(simVis::BIN_OCEAN, simVis::BIN_GLOBAL_SIMSDK);
     stateSet->setDefine("SIMVIS_IGNORE_BATHYMETRY_GEN");
     return rv;
+#endif
 #endif
   }
 }
@@ -883,6 +944,12 @@ int main(int argc, char** argv)
 
   // worldwide imagery layer:
   {
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+    TMSImageLayer* layer = new TMSImageLayer();
+    layer->setName("simdis.imagery");
+    layer->setURL(EXAMPLE_GLOBAL_IMAGERY_LAYER_TMS);
+    map->addLayer(layer);
+#else
     TMSOptions options;
     options.url() = EXAMPLE_GLOBAL_IMAGERY_LAYER_TMS;
 #if SDK_OSGEARTH_MIN_VERSION_REQUIRED(1,6,0)
@@ -890,11 +957,18 @@ int main(int argc, char** argv)
 #else
     map->addImageLayer(new ImageLayer("simdis.imagery", options));
 #endif
+#endif
   }
 
   // If we are testing the bathymetry offset, only load a Kauai inset.
   if (bathymetryOffset != 0.0f)
   {
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+    MBTilesElevationLayer* layer = new MBTilesElevationLayer();
+    layer->setName("simdis.elevation.no.bathy");
+    layer->setURL(simExamples::getSampleDataPath() + "/terrain/" + EXAMPLE_ELEVATION_LAYER_DB);
+    map->addLayer(layer);
+#else
     osgEarth::Drivers::MBTilesTileSourceOptions options;
     options.filename() = simExamples::getSampleDataPath() + "/terrain/" + EXAMPLE_ELEVATION_LAYER_DB;
 #if SDK_OSGEARTH_MIN_VERSION_REQUIRED(1,6,0)
@@ -902,9 +976,16 @@ int main(int argc, char** argv)
 #else
     map->addElevationLayer(new ElevationLayer("simdis.elevation.no.bathy", options));
 #endif
+#endif
   }
   else
   {
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+    TMSElevationLayer* layer = new TMSElevationLayer();
+    layer->setName("simdis.elevation");
+    layer->setURL(EXAMPLE_ELEVATION_LAYER_TMS);
+    map->addLayer(layer);
+#else
     // Otherwise load the global elevation layer with bathymetry.
     TMSOptions options;
     options.url() = EXAMPLE_ELEVATION_LAYER_TMS;
@@ -912,6 +993,7 @@ int main(int argc, char** argv)
     map->addLayer(new ElevationLayer("simdis.elevation", options));
 #else
     map->addElevationLayer(new ElevationLayer("simdis.elevation", options));
+#endif
 #endif
   }
 
@@ -932,7 +1014,11 @@ int main(int argc, char** argv)
   osg::ref_ptr<SkyNode> sky = makeSky(scene.get(), useSilverLining, sluser, sllicense, slpath);
   sky->attach(viewer->getMainView());
   sky->setDateTime(osgEarth::Util::DateTime(2014, 4, 22, 16.5));
+#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+  sky->getSunLight()->setAmbient(simVis::Color::Gray);
+#else
   sky->setMinimumAmbient(simVis::Color::Gray);
+#endif
   scene->setSkyNode(sky.get());
 
   // add an ocean surface to the scene.

@@ -34,8 +34,6 @@
 #include "simVis/Utils.h"
 #include "simVis/EphemerisVector.h"
 
-using namespace osgEarth::Symbology;
-
 namespace simVis
 {
 

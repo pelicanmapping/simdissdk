@@ -28,7 +28,6 @@
 #include "osgEarth/Units"
 #include "osgEarth/Version"
 #include "osgEarthSymbology/Style"
-#include "osgEarthSymbology/Color"
 #include "osgEarthSymbology/TextSymbol"
 #include "osgEarthSymbology/PolygonSymbol"
 #include "osgEarthSymbology/LineSymbol"
@@ -46,6 +45,7 @@
 #include "simCore/String/Format.h"
 #include "simCore/String/Utils.h"
 #include "simCore/String/ValidNumber.h"
+#include "simVis/Types.h"
 #include "simVis/Constants.h"
 #include "simVis/Registry.h"
 #include "simVis/OverheadMode.h"
@@ -140,7 +140,7 @@ GogNodeInterface::GogNodeInterface(osg::Node* osgNode, const simVis::GOG::GogMet
     deferringStyleUpdate_(false),
     defaultFont_("arial.ttf"),
     defaultTextSize_(15),
-    defaultTextColor_(osgEarth::Symbology::Color::Red),
+    defaultTextColor_(simVis::Color::Red),
     rangeUnits_(simCore::Units::YARDS)
 {
   if (osgNode_.valid())
@@ -224,7 +224,7 @@ void GogNodeInterface::applyToStyle(const ParsedShape& parent, const UnitsState&
       setOutlineState(true);
 
     if (parent.hasValue(GOG_LINECOLOR))
-      setLineColor(osgEarth::Symbology::Color(parent.stringValue(GOG_LINECOLOR)));
+      setLineColor(simVis::Color(parent.stringValue(GOG_LINECOLOR)));
 
     if (parent.hasValue(GOG_LINEWIDTH))
       setLineWidth(parent.doubleValue(GOG_LINEWIDTH, 1));
@@ -247,9 +247,9 @@ void GogNodeInterface::applyToStyle(const ParsedShape& parent, const UnitsState&
   if (isFillable)
   {
     if (parent.hasValue(GOG_FILLCOLOR))
-      setFillColor(osgEarth::Symbology::Color(parent.stringValue(GOG_FILLCOLOR)));
+      setFillColor(simVis::Color(parent.stringValue(GOG_FILLCOLOR)));
     else if (parent.hasValue(GOG_LINECOLOR))
-      setFillColor(osgEarth::Symbology::Color(parent.stringValue(GOG_LINECOLOR)));  // Default to the line color if the fill color is not set
+      setFillColor(simVis::Color(parent.stringValue(GOG_LINECOLOR)));  // Default to the line color if the fill color is not set
     setFilledState(isFilled);
   }
   // only points and annotation do not support the fillcolor keyword
@@ -311,12 +311,12 @@ void GogNodeInterface::applyToStyle(const ParsedShape& parent, const UnitsState&
       fontSize = parent.doubleValue(GOG_FONTSIZE, fontSize);
 
     if (parent.hasValue(GOG_LINECOLOR))
-      fontColor = osgEarth::Symbology::Color(parent.stringValue(GOG_LINECOLOR));
+      fontColor = simVis::Color(parent.stringValue(GOG_LINECOLOR));
 
     setFont(fontName, fontSize, fontColor);
 
     // default to black outline
-    setTextOutline(true, osgEarth::Symbology::Color::Black);
+    setTextOutline(true, simVis::Color::Black);
   }
 
   // DEPTH BUFFER attribute
@@ -845,7 +845,7 @@ void GogNodeInterface::setFillColor(const osg::Vec4f& color)
     return;
 
   // set the new color in the PolygonSymbol
-  osgEarth::Symbology::Color colorVec(color);
+  simVis::Color colorVec(color);
   poly->fill()->color() = colorVec;
   setStyle_(style_);
 }
@@ -868,7 +868,7 @@ void GogNodeInterface::setLineColor(const osg::Vec4f& color)
   if (!outlined_)
     return;
   // update the line symbol color
-  osgEarth::Symbology::Color colorVec(color);
+  simVis::Color colorVec(color);
 
   if (metaData_.shape == simVis::GOG::GOG_POINTS)
     style_.getOrCreate<osgEarth::Symbology::PointSymbol>()->fill() = colorVec;
@@ -888,7 +888,7 @@ void GogNodeInterface::setOutlineState(bool outlineState)
   metaData_.setExplicitly(GOG_OUTLINE_SET);
 
   // turn on the outline by applying the current line color. Note that if the current line color has alpha value of 0, this will have no effect
-  osgEarth::Symbology::Color newColor = (outlineState ? osgEarth::Symbology::Color(lineColor_) : osgEarth::Symbology::Color(0.f, 0.f, 0.f, 0.f));
+  simVis::Color newColor = (outlineState ? simVis::Color(lineColor_) : simVis::Color(0.f, 0.f, 0.f, 0.f));
 
   // Points use line color, but applies to the PointSymbol
   if (metaData_.shape == simVis::GOG::GOG_POINTS)
@@ -1091,7 +1091,7 @@ void GogNodeInterface::initializeFillColor_()
   if (style_.has<osgEarth::Symbology::PolygonSymbol>())
     fillColor_ = style_.getSymbol<osgEarth::Symbology::PolygonSymbol>()->fill()->color();
   else
-    fillColor_ = osgEarth::Symbology::Color::Red; // default to red
+    fillColor_ = simVis::Color::Red; // default to red
 }
 
 void GogNodeInterface::initializeLineColor_()
@@ -1099,7 +1099,7 @@ void GogNodeInterface::initializeLineColor_()
   if (style_.has<osgEarth::Symbology::LineSymbol>())
     lineColor_ = style_.getSymbol<osgEarth::Symbology::LineSymbol>()->stroke()->color();
   else
-    lineColor_ = osgEarth::Symbology::Color::Red; // default to red
+    lineColor_ = simVis::Color::Red; // default to red
 }
 
 bool GogNodeInterface::isFillable_(simVis::GOG::GogShape shape) const
@@ -1678,7 +1678,7 @@ void LabelNodeInterface::setFont(const std::string& fontName, int fontSize, cons
 
   std::string fileFullPath = simVis::Registry::instance()->findFontFile(fontName);
   float osgFontSize = simVis::osgFontSize(static_cast<float>(fontSize));
-  osgEarth::Symbology::Color colorVec(color);
+  simVis::Color colorVec(color);
 
   if (ts->font() != fileFullPath)
     metaData_.setExplicitly(GOG_FONT_NAME_SET);
@@ -1705,7 +1705,7 @@ void LabelNodeInterface::setTextOutline(bool draw, const osg::Vec4f& outlineColo
   if (draw)
     ts->halo()->color() = outlineColor_;
   else
-    ts->halo()->color() = osgEarth::Symbology::Color(0.f, 0.f, 0.f, 0.f);
+    ts->halo()->color() = simVis::Color(0.f, 0.f, 0.f, 0.f);
 
   setStyle_(style_);
 }

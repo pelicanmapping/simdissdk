@@ -36,8 +36,6 @@
 #include "simVis/InsetViewEventHandler.h"
 #include "simVis/NavigationModes.h"
 #include "simUtil/ExampleResources.h"
-
-#include "osgEarthDrivers/gdal/GDALOptions"
 #include "osgDB/ReadFile"
 
 #define LC "[BasicViewer demo] "

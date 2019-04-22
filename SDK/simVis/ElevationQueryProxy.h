@@ -25,7 +25,6 @@
 #include "simCore/Common/Common.h"
 #include "osg/observer_ptr"
 #include "osg/ref_ptr"
-#include "osgEarth/MapFrame"
 
 namespace osg {
   class Group;
@@ -132,8 +131,6 @@ private:
   osgEarth::ElevationQuery* query_;
   osg::observer_ptr<const osgEarth::Map> map_;
   osg::observer_ptr<osg::Group> scene_;
-  /// keep map in a MapFrame to avoid conflicts when accessing elevation pool
-  osgEarth::MapFrame mapf_;
 
   class MapChangeListener;
   /// listener to map changes, to update the map reference

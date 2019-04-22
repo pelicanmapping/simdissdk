@@ -63,6 +63,7 @@ set(VIS_HEADERS_CORE
     ${VIS_INC}CustomRendering.h
     ${VIS_INC}CylinderGeode.h
     ${VIS_INC}CylinderStorage.h
+    ${VIS_INC}DBFormat.h
     ${VIS_INC}DBOptions.h
     ${VIS_INC}DisableDepthOnAlpha.h
     ${VIS_INC}DynamicScaleTransform.h
@@ -203,6 +204,7 @@ set(VIS_SOURCES_CORE
     ${VIS_SRC}CustomRendering.cpp
     ${VIS_SRC}CylinderGeode.cpp
     ${VIS_SRC}CylinderStorage.cpp
+    ${VIS_SRC}DBFormat.cpp
     ${VIS_INC}DisableDepthOnAlpha.cpp
     ${VIS_SRC}DynamicScaleTransform.cpp
     ${VIS_SRC}EarthManipulator.cpp

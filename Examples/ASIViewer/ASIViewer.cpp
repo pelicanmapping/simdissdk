@@ -39,10 +39,10 @@
 #include "simVis/Utils.h"
 #include "simVis/Registry.h"
 #include "simVis/Projector.h"
+#include "simVis/Types.h"
 #include "simUtil/ExampleResources.h"
 
 #include <osgEarth/StringUtils>
-#include <osgEarthSymbology/Color>
 #include <osgEarthUtil/Controls>
 #include <osg/ImageStream>
 
@@ -83,7 +83,7 @@ simData::GateProperties::GateType gateTypeFromString(const std::string &gateType
 
 unsigned colorFromString(const std::string &colorString)
 {
-  using namespace osgEarth::Symbology;
+  using namespace simVis;
 
   if (colorString[0] == '0' && colorString[1] == 'x')
   {

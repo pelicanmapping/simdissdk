@@ -25,6 +25,7 @@
 #include "simNotify/Notify.h"
 #include "simCore/Calc/Angle.h"
 #include "simCore/Calc/Math.h"
+#include "simVis/Types.h"
 #include "simVis/GOG/Ellipsoid.h"
 #include "simVis/GOG/GogNodeInterface.h"
 #include "simVis/GOG/HostedLocalGeometryNode.h"
@@ -53,7 +54,7 @@ GogNodeInterface* Ellipsoid::deserialize(const ParsedShape& parsedShape,
       z_diam = x_diam;
   }
 
-  osg::Vec4f color(osgEarth::Symbology::Color::White);
+  osg::Vec4f color(simVis::Color::White);
 
   float x_radius_m = x_diam.as(osgEarth::Units::METERS) / 2.0;
   float y_radius_m = y_diam.as(osgEarth::Units::METERS) / 2.0;

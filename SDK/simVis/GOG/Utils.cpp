@@ -193,7 +193,7 @@ void Utils::serializeGeometry(const osgEarth::Symbology::Geometry* geometry, boo
 
 std::string Utils::serializeOsgColor(const osg::Vec4f& colorVec)
 {
-  osgEarth::Symbology::Color color(colorVec);
+  simVis::Color color(colorVec);
   std::ostringstream os;
   os << std::hex << std::showbase << color.asRGBA();
   return os.str();
