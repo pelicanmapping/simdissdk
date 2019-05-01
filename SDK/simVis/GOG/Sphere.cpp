@@ -19,8 +19,8 @@
  * disclose, or release this software.
  *
  */
-#include "osgEarthAnnotation/LocalGeometryNode"
-#include "osgEarthAnnotation/AnnotationUtils"
+#include "osgEarth/LocalGeometryNode"
+#include "osgEarth/AnnotationUtils"
 #include "osg/CullFace"
 #include "simNotify/Notify.h"
 #include "simCore/Calc/Angle.h"
@@ -48,15 +48,15 @@ GogNodeInterface* Sphere::deserialize(const ParsedShape& parsedShape,
 
   float radius_m = radius.as(osgEarth::Units::METERS);
 
-  osg::Node* shape = osgEarth::Annotation::AnnotationUtils::createSphere(
+  osg::Node* shape = osgEarth::AnnotationUtils::createSphere(
     radius_m, color);
   shape->setName("GOG Sphere");
 
-  osgEarth::Annotation::LocalGeometryNode* node = NULL;
+  osgEarth::LocalGeometryNode* node = NULL;
 
   if (nodeType == GOGNODE_GEOGRAPHIC)
   {
-    node = new osgEarth::Annotation::LocalGeometryNode();
+    node = new osgEarth::LocalGeometryNode();
     node->getPositionAttitudeTransform()->addChild(shape);
     node->setStyle(p.style_);
     node->setMapNode(mapNode);

@@ -27,7 +27,7 @@
 namespace simUtil {
 
 /** Note: Not exported. */
-class Shaders : public osgEarth::ShaderPackage
+class Shaders : public osgEarth::Support::ShaderPackage
 {
 public:
   Shaders();

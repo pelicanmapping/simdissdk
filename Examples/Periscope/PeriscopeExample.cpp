@@ -44,23 +44,16 @@
 
 #include "osgEarth/Version"
 
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
 #ifdef HAVE_TRITON_NODEKIT
 #include "osgEarthTriton/TritonLayer"
 #endif
-#include "osgEarthUtil/SimpleOceanLayer"
-#else
-#ifdef HAVE_TRITON_NODEKIT
-#include "osgEarthTriton/TritonLayer"
-#include "osgEarthTriton/TritonOptions"
-#endif
-#endif
+#include "osgEarth/SimpleOceanLayer"
 
 #ifdef HAVE_SILVERLINING_NODEKIT
 #include "osgEarthSilverLining/SilverLiningNode"
 #endif
 
-#include "osgEarthUtil/Controls"
+#include "osgEarth/Controls"
 
 #define SHIP_LAT        19.698193
 #define SHIP_LON      -156.20224
@@ -213,9 +206,9 @@ namespace
   }
 
   /** Factory for a sky node */
-  SkyNode* makeSky(osgEarth::MapNode* mapNode, bool useSilverLining, const std::string& slUser="", const std::string& slLicense="", const std::string& resourcePath="")
+  osgEarth::SkyNode* makeSky(osgEarth::MapNode* mapNode, bool useSilverLining, const std::string& slUser="", const std::string& slLicense="", const std::string& resourcePath="")
   {
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0) && defined(HAVE_SILVERLINING_NODEKIT)
+#ifdef HAVE_SILVERLINING_NODEKIT
     if (useSilverLining)
     {
       osgEarth::SilverLining::SilverLiningOptions sl;
@@ -230,30 +223,10 @@ namespace
       return new osgEarth::SilverLining::SilverLiningNode(sl);
     }
     else
-    {
-      return SkyNode::create();
-    }
-#else
-    Config skyOptions;
-    if (useSilverLining)
-    {
-      skyOptions.set("driver", "silverlining");
-      if (!slUser.empty())
-        skyOptions.set("user", slUser);
-      if (!slLicense.empty())
-        skyOptions.set("license_code", slLicense);
-      if (!resourcePath.empty())
-        skyOptions.set("resource_path", resourcePath);
-      skyOptions.set("clouds", true);
-      skyOptions.set("clouds_max_altitude", 100000.0);
-    }
-    else
-    {
-      skyOptions.set("driver", "simple");
-    }
-
-    return SkyNode::create(ConfigOptions(skyOptions), mapNode);
 #endif
+    {
+      return osgEarth::SkyNode::create();
+    }
   }
 
 }
@@ -334,7 +307,6 @@ int main(int argc, char** argv)
   s_shipId = createShip(dataStore);
 
   // add an ocean surface to the scene.
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
 #ifdef HAVE_TRITON_NODEKIT
   if (useTriton)
   {
@@ -350,42 +322,15 @@ int main(int argc, char** argv)
   else
 #endif
   {
-    osgEarth::Util::SimpleOceanLayer* layer = new osgEarth::Util::SimpleOceanLayer();
+    osgEarth::SimpleOceanLayer* layer = new osgEarth::SimpleOceanLayer();
     scene->getMap()->addLayer(layer);
   }
-#else
-#ifdef HAVE_TRITON_NODEKIT
-  if (useTriton)
-  {
-    osgEarth::Triton::TritonOptions triton;
-    if (!tritonUser.empty())
-      triton.user() = tritonUser;
-    if (!tritonLicense.empty())
-      triton.licenseCode() = tritonLicense;
-    if (!tritonPath.empty())
-      triton.resourcePath() = tritonPath;
-
-    triton.useHeightMap() = false;
-    triton.maxAltitude() = 30000.0f;
-    triton.renderBinNumber() = simVis::BIN_OCEAN;
-    osgEarth::Triton::TritonLayer* layer = new osgEarth::Triton::TritonLayer(triton);
-    scene->getMap()->addLayer(layer);
-  }
-  else
-#endif
-  {
-    Config oceanOptions;
-    oceanOptions.set("driver", "simple");
-    osg::ref_ptr<osg::Node> ocean = OceanNode::create(ConfigOptions(oceanOptions), scene->getMapNode());
-    scene->getScenario()->addChild(ocean.get());
-  }
-#endif
 
   // Add a sky
   // add a sky to the scene.
-  osg::ref_ptr<SkyNode> sky = makeSky(scene->getMapNode(), useSilverLining, sluser, sllicense, slpath);
+  osg::ref_ptr<osgEarth::SkyNode> sky = makeSky(scene->getMapNode(), useSilverLining, sluser, sllicense, slpath);
   sky->attach(viewer->getMainView());
-  sky->setDateTime(osgEarth::Util::DateTime(2014, 4, 22, 16.5));
+  sky->setDateTime(osgEarth::DateTime(2014, 4, 22, 16.5));
   scene->setSkyNode(sky.get());
 
   // Set ambient light

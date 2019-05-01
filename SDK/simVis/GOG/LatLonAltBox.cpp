@@ -19,16 +19,16 @@
  * disclose, or release this software.
  *
  */
-#include "osgEarthSymbology/GeometryFactory"
-#include "osgEarthFeatures/GeometryCompiler"
-#include "osgEarthAnnotation/FeatureNode"
+#include "osgEarth/GeometryFactory"
+#include "osgEarth/GeometryCompiler"
+#include "osgEarth/FeatureNode"
 #include "simVis/GOG/LatLonAltBox.h"
 #include "simVis/GOG/GogNodeInterface.h"
 #include "simVis/GOG/ParsedShape.h"
 #include "simVis/GOG/Utils.h"
 
 using namespace simVis::GOG;
-using namespace osgEarth::Features;
+using namespace osgEarth;
 
 GogNodeInterface* LatLonAltBox::deserialize(const ParsedShape& parsedShape,
                           simVis::GOG::ParserData& p,
@@ -81,7 +81,7 @@ GogNodeInterface* LatLonAltBox::deserialize(const ParsedShape& parsedShape,
 
     // Turn on backface culling.  Lines will still be visible through the polygons if the polygon is
     // semi-transparent.  If you always want to see lines then remove this line.
-    style.getOrCreateSymbol<osgEarth::Symbology::RenderSymbol>()->backfaceCulling() = true;
+    style.getOrCreateSymbol<osgEarth::RenderSymbol>()->backfaceCulling() = true;
 
     // result geometry:
     MultiGeometry* lines = new MultiGeometry();
@@ -131,7 +131,7 @@ GogNodeInterface* LatLonAltBox::deserialize(const ParsedShape& parsedShape,
 
     Feature* feature = new Feature(lines, mapNode->getMapSRS(), style);
     feature->setName("GOG LatLonAltBox Feature");
-    osgEarth::Annotation::FeatureNode* node = new osgEarth::Annotation::FeatureNode(feature);
+    osgEarth::FeatureNode* node = new osgEarth::FeatureNode(feature);
     node->setName("GOG LatLonAltBox");
     node->setMapNode(mapNode);
     GogNodeInterface* rv = new FeatureNodeInterface(node, metaData);

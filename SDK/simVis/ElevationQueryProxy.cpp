@@ -121,7 +121,7 @@ ElevationQueryProxy::ElevationQueryProxy(const osgEarth::Map* map, osg::Group* s
     scene_(scene)
 {
   data_ = new PrivateData();
-  query_ = new osgEarth::ElevationQuery(map);
+  query_ = new osgEarth::Util::ElevationQuery(map);
 
 #if SDK_OSGEARTH_VERSION_LESS_THAN(1,6,0)
   // Prior to the 10/2016 API, this had to be set to true; now that's the default
@@ -145,7 +145,7 @@ ElevationQueryProxy::~ElevationQueryProxy()
   data_ = NULL;
 }
 
-osgEarth::ElevationQuery* ElevationQueryProxy::q() const
+osgEarth::Util::ElevationQuery* ElevationQueryProxy::q() const
 {
   return query_;
 }
@@ -244,7 +244,7 @@ void ElevationQueryProxy::setMap(const osgEarth::Map* map)
     return;
 
   delete query_;
-  query_ = new osgEarth::ElevationQuery(map);
+  query_ = new osgEarth::Util::ElevationQuery(map);
   map_ = map;
 }
 

@@ -27,17 +27,17 @@
 #include "osg/PolygonOffset"
 #include "osgEarth/Units"
 #include "osgEarth/Version"
-#include "osgEarthSymbology/Style"
-#include "osgEarthSymbology/TextSymbol"
-#include "osgEarthSymbology/PolygonSymbol"
-#include "osgEarthSymbology/LineSymbol"
-#include "osgEarthSymbology/AltitudeSymbol"
-#include "osgEarthSymbology/RenderSymbol"
-#include "osgEarthAnnotation/LabelNode"
-#include "osgEarthAnnotation/PlaceNode"
-#include "osgEarthAnnotation/GeoPositionNode"
-#include "osgEarthAnnotation/LocalGeometryNode"
-#include "osgEarthAnnotation/FeatureNode"
+#include "osgEarth/Style"
+#include "osgEarth/TextSymbol"
+#include "osgEarth/PolygonSymbol"
+#include "osgEarth/LineSymbol"
+#include "osgEarth/AltitudeSymbol"
+#include "osgEarth/RenderSymbol"
+#include "osgEarth/LabelNode"
+#include "osgEarth/PlaceNode"
+#include "osgEarth/GeoPositionNode"
+#include "osgEarth/LocalGeometryNode"
+#include "osgEarth/FeatureNode"
 #include "simNotify/Notify.h"
 #include "simCore/Calc/Angle.h"
 #include "simCore/Calc/CoordinateConverter.h"
@@ -593,10 +593,10 @@ int GogNodeInterface::getLineState(bool& outlineState, osg::Vec4f& color, Utils:
   lineWidth = 1;
 
   // no line symbol loaded, just return
-  if (!(style_.has<osgEarth::Symbology::LineSymbol>()))
+  if (!(style_.has<osgEarth::LineSymbol>()))
     return 0;
 
-  const osgEarth::Symbology::LineSymbol* linePtr = style_.getSymbol<osgEarth::Symbology::LineSymbol>();
+  const osgEarth::LineSymbol* linePtr = style_.getSymbol<osgEarth::LineSymbol>();
   lineWidth = static_cast<int>(*(linePtr->stroke()->width()));
   // now figure out line style based on the stipple value
   unsigned short stipple = *(linePtr->stroke()->stipple());
@@ -606,9 +606,9 @@ int GogNodeInterface::getLineState(bool& outlineState, osg::Vec4f& color, Utils:
 
 int GogNodeInterface::getPointSize(int& pointSize) const
 {
-  if (!style_.has<osgEarth::Symbology::PointSymbol>())
+  if (!style_.has<osgEarth::PointSymbol>())
     return 1;
-  pointSize = static_cast<int>(*(style_.getSymbol<osgEarth::Symbology::PointSymbol>()->size()));
+  pointSize = static_cast<int>(*(style_.getSymbol<osgEarth::PointSymbol>()->size()));
   return 0;
 }
 
@@ -657,12 +657,12 @@ void GogNodeInterface::setDepthBuffer(bool depthBuffer)
   // if override is in effect, nothing more to do
   if (depthBufferOverride_ != DEPTHBUFFER_IGNORE_OVERRIDE)
     return;
-  style_.getOrCreate<osgEarth::Symbology::RenderSymbol>()->depthTest() = depthBuffer;
+  style_.getOrCreate<osgEarth::RenderSymbol>()->depthTest() = depthBuffer;
   if (!depthBuffer) // unset the clip pane if depth buffer turned off
-    style_.getOrCreate<osgEarth::Symbology::RenderSymbol>()->clipPlane() = simVis::CLIPPLANE_VISIBLE_HORIZON;
+    style_.getOrCreate<osgEarth::RenderSymbol>()->clipPlane() = simVis::CLIPPLANE_VISIBLE_HORIZON;
   else
   {
-    style_.getOrCreate<osgEarth::Symbology::RenderSymbol>()->clipPlane().unset();
+    style_.getOrCreate<osgEarth::RenderSymbol>()->clipPlane().unset();
     // Explicitly remove all clip planes settings from child nodes
     if (osgNode_.valid())
     {
@@ -692,9 +692,9 @@ void GogNodeInterface::setDepthBufferOverrideState(DepthBufferOverride state)
     break;
   }
 
-  style_.getOrCreate<osgEarth::Symbology::RenderSymbol>()->depthTest() = depthBuffer;
+  style_.getOrCreate<osgEarth::RenderSymbol>()->depthTest() = depthBuffer;
   if (!depthBuffer) // unset the clip pane if depth buffer turned off
-    style_.getOrCreate<osgEarth::Symbology::RenderSymbol>()->clipPlane() = simVis::CLIPPLANE_VISIBLE_HORIZON;
+    style_.getOrCreate<osgEarth::RenderSymbol>()->clipPlane() = simVis::CLIPPLANE_VISIBLE_HORIZON;
   setStyle_(style_);
 }
 
@@ -753,19 +753,19 @@ void GogNodeInterface::setExtrude(bool extrude)
   // Force backface culling off for extruded shapes, and on for flat shapes so we can see their backsides.
   // There is an exception for Lines/LineSegs due to extrusion to 2D instead of 3D
   const bool isLine = (metaData_.shape == GOG_LINE || metaData_.shape == GOG_LINESEGS);
-  style_.getOrCreate<osgEarth::Symbology::RenderSymbol>()->backfaceCulling() = extrude && !isLine;
+  style_.getOrCreate<osgEarth::RenderSymbol>()->backfaceCulling() = extrude && !isLine;
   // In some cases it appears that extrusion can cause lighting
-  style_.getOrCreate<osgEarth::Symbology::RenderSymbol>()->lighting() = false;
+  style_.getOrCreate<osgEarth::RenderSymbol>()->lighting() = false;
 
   if (extrude)
   {
     // need to add an invisible polygon symbol here, since for some reason extrusion fills itself with the default color otherwise
     if (!filled_)
     {
-      osgEarth::Symbology::PolygonSymbol* polygonSymbol = style_.getOrCreate<osgEarth::Symbology::PolygonSymbol>();
+      osgEarth::PolygonSymbol* polygonSymbol = style_.getOrCreate<osgEarth::PolygonSymbol>();
       polygonSymbol->fill()->color() = osg::Vec4(); // transparent
     }
-    osgEarth::Symbology::ExtrusionSymbol* ext = style_.getOrCreate<osgEarth::Symbology::ExtrusionSymbol>();
+    osgEarth::ExtrusionSymbol* ext = style_.getOrCreate<osgEarth::ExtrusionSymbol>();
     // set the height value if necessary, otherwise unset to allow extrude to ground
     if (height != 0.f)
       ext->height() = height;
@@ -774,7 +774,7 @@ void GogNodeInterface::setExtrude(bool extrude)
   }
   else
   {
-    osgEarth::Symbology::ExtrusionSymbol* ext = style_.getSymbol<osgEarth::Symbology::ExtrusionSymbol>();
+    osgEarth::ExtrusionSymbol* ext = style_.getSymbol<osgEarth::ExtrusionSymbol>();
     if (ext)
      style_.removeSymbol(ext);
   }
@@ -782,10 +782,10 @@ void GogNodeInterface::setExtrude(bool extrude)
 
   // Need to have a polygon symbol if extruded
   if (extruded_)
-    assert(style_.has<osgEarth::Symbology::PolygonSymbol>());
+    assert(style_.has<osgEarth::PolygonSymbol>());
   // Polygon symbol must be invisible if not filled
   if (extruded_ && !filled_)
-    assert(style_.getSymbol<osgEarth::Symbology::PolygonSymbol>()->fill()->color()[3] == 0.);
+    assert(style_.getSymbol<osgEarth::PolygonSymbol>()->fill()->color()[3] == 0.);
 
 }
 
@@ -811,17 +811,17 @@ void GogNodeInterface::setFilledState(bool state)
   if (state)
   {
     // fill requires polygon symbol (this will mean that osgEarth treats it as a polygon)
-    osgEarth::Symbology::PolygonSymbol* polygonSymbol = style_.getOrCreate<osgEarth::Symbology::PolygonSymbol>();
+    osgEarth::PolygonSymbol* polygonSymbol = style_.getOrCreate<osgEarth::PolygonSymbol>();
     polygonSymbol->fill()->color() = fillColor_;
     setStyle_(style_);
   }
-  else if (style_.has<osgEarth::Symbology::PolygonSymbol>())
+  else if (style_.has<osgEarth::PolygonSymbol>())
   {
     // since extrusion requires an invisible polygon symbol (if not filled), make it invisible if extruded, otherwise remove the symbol altogether
     if (extruded_)
-      style_.getSymbol<osgEarth::Symbology::PolygonSymbol>()->fill()->color() = osg::Vec4(); // transparent
+      style_.getSymbol<osgEarth::PolygonSymbol>()->fill()->color() = osg::Vec4(); // transparent
     else
-      style_.remove<osgEarth::Symbology::PolygonSymbol>();
+      style_.remove<osgEarth::PolygonSymbol>();
     setStyle_(style_);
   }
 }
@@ -840,7 +840,7 @@ void GogNodeInterface::setFillColor(const osg::Vec4f& color)
     return;
 
   // Pull out the polygon style to update it
-  osgEarth::Symbology::PolygonSymbol* poly = style_.getSymbol<osgEarth::Symbology::PolygonSymbol>();
+  osgEarth::PolygonSymbol* poly = style_.getSymbol<osgEarth::PolygonSymbol>();
   if (!poly) // don't update color if no polygon symbol to update
     return;
 
@@ -871,9 +871,9 @@ void GogNodeInterface::setLineColor(const osg::Vec4f& color)
   simVis::Color colorVec(color);
 
   if (metaData_.shape == simVis::GOG::GOG_POINTS)
-    style_.getOrCreate<osgEarth::Symbology::PointSymbol>()->fill() = colorVec;
+    style_.getOrCreate<osgEarth::PointSymbol>()->fill() = colorVec;
   else
-    style_.getOrCreate<osgEarth::Symbology::LineSymbol>()->stroke()->color() = colorVec;
+    style_.getOrCreate<osgEarth::LineSymbol>()->stroke()->color() = colorVec;
 
   setStyle_(style_);
 }
@@ -892,9 +892,9 @@ void GogNodeInterface::setOutlineState(bool outlineState)
 
   // Points use line color, but applies to the PointSymbol
   if (metaData_.shape == simVis::GOG::GOG_POINTS)
-    style_.getOrCreate<osgEarth::Symbology::PointSymbol>()->fill() = newColor;
+    style_.getOrCreate<osgEarth::PointSymbol>()->fill() = newColor;
   else
-    style_.getOrCreate<osgEarth::Symbology::LineSymbol>()->stroke()->color() = newColor;
+    style_.getOrCreate<osgEarth::LineSymbol>()->stroke()->color() = newColor;
 
   setStyle_(style_);
 }
@@ -909,7 +909,7 @@ void GogNodeInterface::setLineStyle(Utils::LineStyle style)
 
   // use some default values to represent various draw styles
   unsigned short lineStyle = Utils::getStippleFromLineStyle(style);
-  osgEarth::Symbology::LineSymbol* lineSymbol = style_.getOrCreate<osgEarth::Symbology::LineSymbol>();
+  osgEarth::LineSymbol* lineSymbol = style_.getOrCreate<osgEarth::LineSymbol>();
   lineSymbol->stroke()->stipple() = lineStyle;
   setStyle_(style_);
 }
@@ -922,7 +922,7 @@ void GogNodeInterface::setLineWidth(int lineWidth)
 
   metaData_.setExplicitly(GOG_LINE_WIDTH_SET);
 
-  osgEarth::Symbology::LineSymbol* lineSymbol = style_.getOrCreate<osgEarth::Symbology::LineSymbol>();
+  osgEarth::LineSymbol* lineSymbol = style_.getOrCreate<osgEarth::LineSymbol>();
   lineSymbol->stroke()->width() = static_cast<float>(lineWidth);
   setStyle_(style_);
 }
@@ -934,7 +934,7 @@ void GogNodeInterface::setPointSize(int pointSize)
 
   metaData_.setExplicitly(GOG_POINT_SIZE_SET);
 
-  style_.getOrCreate<osgEarth::Symbology::PointSymbol>()->size() = static_cast<float>(pointSize);
+  style_.getOrCreate<osgEarth::PointSymbol>()->size() = static_cast<float>(pointSize);
   setStyle_(style_);
 }
 
@@ -972,7 +972,7 @@ void GogNodeInterface::fireDrawChanged_() const
   }
 }
 
-void GogNodeInterface::setGeoPositionAltitude_(osgEarth::Annotation::GeoPositionNode& node, double altitudeAdjustment)
+void GogNodeInterface::setGeoPositionAltitude_(osgEarth::GeoPositionNode& node, double altitudeAdjustment)
 {
   bool extrude = false;
   osgEarth::AltitudeMode mode = osgEarth::ALTMODE_ABSOLUTE;
@@ -1013,7 +1013,7 @@ void GogNodeInterface::setGeoPositionAltitude_(osgEarth::Annotation::GeoPosition
   setExtrude(extrude);
 }
 
-void GogNodeInterface::initializeFromGeoPositionNode_(const osgEarth::Annotation::GeoPositionNode& node)
+void GogNodeInterface::initializeFromGeoPositionNode_(const osgEarth::GeoPositionNode& node)
 {
   hasMapNode_ = (node.getMapNode() != NULL);
   // use node position if there is a map node
@@ -1028,25 +1028,25 @@ bool GogNodeInterface::hasValidAltitudeMode() const
   // The combinations here match those applied in the setAltitudeMode or initializeAltitudeSymbol_ methods, since those are the known valid combinations.
 
   // check for altitude mode ALTITUDE_EXTRUDE
-  if (style_.has<osgEarth::Symbology::ExtrusionSymbol>())
+  if (style_.has<osgEarth::ExtrusionSymbol>())
     return true;
 
   // check for an AltitudeSymbol
-  const osgEarth::Symbology::AltitudeSymbol* alt = style_.getSymbol<osgEarth::Symbology::AltitudeSymbol>();
+  const osgEarth::AltitudeSymbol* alt = style_.getSymbol<osgEarth::AltitudeSymbol>();
   if (alt == NULL)
     return false;
 
   // check for altitude mode ALTITUDE_NONE
-  if (alt->clamping() == osgEarth::Symbology::AltitudeSymbol::CLAMP_NONE &&
-    alt->technique() == osgEarth::Symbology::AltitudeSymbol::TECHNIQUE_GPU)
+  if (alt->clamping() == osgEarth::AltitudeSymbol::CLAMP_NONE &&
+    alt->technique() == osgEarth::AltitudeSymbol::TECHNIQUE_GPU)
     return true;
   // check for altitude mode ALTITUDE_GROUND_CLAMPED
-  if (alt->clamping() == osgEarth::Symbology::AltitudeSymbol::CLAMP_TO_TERRAIN &&
-    alt->technique() == osgEarth::Symbology::AltitudeSymbol::TECHNIQUE_SCENE)
+  if (alt->clamping() == osgEarth::AltitudeSymbol::CLAMP_TO_TERRAIN &&
+    alt->technique() == osgEarth::AltitudeSymbol::TECHNIQUE_SCENE)
     return true;
   // check for altitude mode ALTITUDE_GROUND_RELATIVE
-  if (alt->clamping() == osgEarth::Symbology::AltitudeSymbol::CLAMP_RELATIVE_TO_TERRAIN &&
-    alt->technique() == osgEarth::Symbology::AltitudeSymbol::TECHNIQUE_SCENE)
+  if (alt->clamping() == osgEarth::AltitudeSymbol::CLAMP_RELATIVE_TO_TERRAIN &&
+    alt->technique() == osgEarth::AltitudeSymbol::TECHNIQUE_SCENE)
     return true;
 
   return false;
@@ -1061,9 +1061,9 @@ void GogNodeInterface::applyBackfaceCulling()
   bool isClosed3dShape = (shape() == GOG_SPHERE || shape() == GOG_ELLIPSOID || shape() == GOG_CYLINDER || shape() == GOG_LATLONALTBOX);
   const bool isLine = (shape() == GOG_LINE || shape() == GOG_LINESEGS);
   if (isClosed3dShape || (extruded_ && !isLine))
-    style_.getOrCreateSymbol<osgEarth::Symbology::RenderSymbol>()->backfaceCulling() = true;
+    style_.getOrCreateSymbol<osgEarth::RenderSymbol>()->backfaceCulling() = true;
   else
-    style_.getOrCreateSymbol<osgEarth::Symbology::RenderSymbol>()->backfaceCulling() = false;
+    style_.getOrCreateSymbol<osgEarth::RenderSymbol>()->backfaceCulling() = false;
 
   setStyle_(style_);
 }
@@ -1079,25 +1079,25 @@ bool GogNodeInterface::getMetaDataFlag_(const std::string& flag, std::string& me
 
 void GogNodeInterface::initializeAltitudeSymbol_()
 {
-  osgEarth::Symbology::AltitudeSymbol* alt = style_.getOrCreate<osgEarth::Symbology::AltitudeSymbol>();
-  alt->clamping() = osgEarth::Symbology::AltitudeSymbol::CLAMP_TO_TERRAIN;
-  alt->technique() = osgEarth::Symbology::AltitudeSymbol::TECHNIQUE_SCENE;
-  alt->binding() = osgEarth::Symbology::AltitudeSymbol::BINDING_VERTEX;
+  osgEarth::AltitudeSymbol* alt = style_.getOrCreate<osgEarth::AltitudeSymbol>();
+  alt->clamping() = osgEarth::AltitudeSymbol::CLAMP_TO_TERRAIN;
+  alt->technique() = osgEarth::AltitudeSymbol::TECHNIQUE_SCENE;
+  alt->binding() = osgEarth::AltitudeSymbol::BINDING_VERTEX;
   setStyle_(style_);
 }
 
 void GogNodeInterface::initializeFillColor_()
 {
-  if (style_.has<osgEarth::Symbology::PolygonSymbol>())
-    fillColor_ = style_.getSymbol<osgEarth::Symbology::PolygonSymbol>()->fill()->color();
+  if (style_.has<osgEarth::PolygonSymbol>())
+    fillColor_ = style_.getSymbol<osgEarth::PolygonSymbol>()->fill()->color();
   else
     fillColor_ = simVis::Color::Red; // default to red
 }
 
 void GogNodeInterface::initializeLineColor_()
 {
-  if (style_.has<osgEarth::Symbology::LineSymbol>())
-    lineColor_ = style_.getSymbol<osgEarth::Symbology::LineSymbol>()->stroke()->color();
+  if (style_.has<osgEarth::LineSymbol>())
+    lineColor_ = style_.getSymbol<osgEarth::LineSymbol>()->stroke()->color();
   else
     lineColor_ = simVis::Color::Red; // default to red
 }
@@ -1155,7 +1155,7 @@ bool GogNodeInterface::fillOnlyWhenExtruded_(simVis::GOG::GogShape shape) const
   return false;
 }
 
-const osgEarth::Symbology::Style& GogNodeInterface::getStyle_() const
+const osgEarth::Style& GogNodeInterface::getStyle_() const
 {
   return style_;
 }
@@ -1186,7 +1186,7 @@ void GogNodeInterface::serializeKeyword_(std::ostream& gogOutputStream) const
 
 ///////////////////////////////////////////////////////////////////
 
-AnnotationNodeInterface::AnnotationNodeInterface(osgEarth::Annotation::AnnotationNode* annotationNode, const simVis::GOG::GogMetaData& metaData)
+AnnotationNodeInterface::AnnotationNodeInterface(osgEarth::AnnotationNode* annotationNode, const simVis::GOG::GogMetaData& metaData)
   : GogNodeInterface(annotationNode, metaData),
   annotationNode_(annotationNode)
 {
@@ -1229,7 +1229,7 @@ void AnnotationNodeInterface::serializeGeometry_(bool relativeShape, std::ostrea
   // No-op.  AnnotationNodeInterface is a "best attempt" when loading an unrecognized osg node.  Can't serialize generically
 }
 
-void AnnotationNodeInterface::setStyle_(const osgEarth::Symbology::Style& style)
+void AnnotationNodeInterface::setStyle_(const osgEarth::Style& style)
 {
   if (&style != &style_)
     style_ = style;
@@ -1240,7 +1240,7 @@ void AnnotationNodeInterface::setStyle_(const osgEarth::Symbology::Style& style)
 
 ///////////////////////////////////////////////////////////////////
 
-FeatureNodeInterface::FeatureNodeInterface(osgEarth::Annotation::FeatureNode* featureNode, const simVis::GOG::GogMetaData& metaData)
+FeatureNodeInterface::FeatureNodeInterface(osgEarth::FeatureNode* featureNode, const simVis::GOG::GogMetaData& metaData)
   : GogNodeInterface(featureNode, metaData),
     featureNode_(featureNode)
 {
@@ -1253,7 +1253,7 @@ FeatureNodeInterface::FeatureNodeInterface(osgEarth::Annotation::FeatureNode* fe
   initializeLineColor_();
 
   // initialize our original altitudes
-  osgEarth::Symbology::Geometry* geometry = featureNode_->getFeature()->getGeometry();
+  osgEarth::Geometry* geometry = featureNode_->getFeature()->getGeometry();
   for (size_t i = 0; i < geometry->size(); ++i)
   {
     originalAltitude_.push_back((*geometry)[i].z());
@@ -1269,7 +1269,7 @@ int FeatureNodeInterface::getPosition(osg::Vec3d& position, osgEarth::GeoPoint* 
   osg::Vec3d lowerBound(std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), 0.0);
   osg::Vec3d upperBound(-std::numeric_limits<double>::max(), -std::numeric_limits<double>::max(), 0.0);
 
-  osgEarth::Symbology::Geometry* geometry = featureNode_->getFeature()->getGeometry();
+  osgEarth::Geometry* geometry = featureNode_->getFeature()->getGeometry();
   std::vector<osg::Vec3d> points;
   Utils::getGeometryPoints(geometry, points);
 
@@ -1325,9 +1325,9 @@ int FeatureNodeInterface::getTessellation(TessellationStyle& tessellation) const
   default:
     break;
   }
-  if (!style_.has<osgEarth::Symbology::LineSymbol>())
+  if (!style_.has<osgEarth::LineSymbol>())
     return 1;
-  const osgEarth::Symbology::LineSymbol* ls = style_.getSymbol<osgEarth::Symbology::LineSymbol>();
+  const osgEarth::LineSymbol* ls = style_.getSymbol<osgEarth::LineSymbol>();
 
   if (!ls->tessellationSize().isSet() || *(ls->tessellationSize()) == 0)
   {
@@ -1336,10 +1336,10 @@ int FeatureNodeInterface::getTessellation(TessellationStyle& tessellation) const
   }
   switch (*(featureNode_->getFeature()->geoInterp()))
   {
-  case osgEarth::Symbology::GEOINTERP_RHUMB_LINE:
+  case osgEarth::GEOINTERP_RHUMB_LINE:
     tessellation = TESSELLATE_RHUMBLINE;
     break;
-  case osgEarth::Symbology::GEOINTERP_GREAT_CIRCLE:
+  case osgEarth::GEOINTERP_GREAT_CIRCLE:
     tessellation = TESSELLATE_GREAT_CIRCLE_PROJECTION;
     break;
   default:
@@ -1353,7 +1353,7 @@ void FeatureNodeInterface::setAltOffset(double altOffsetMeters)
 {
   if (altOffsetMeters == altOffset_)
     return;
-  osgEarth::Symbology::Geometry* geometry = featureNode_->getFeature()->getGeometry();
+  osgEarth::Geometry* geometry = featureNode_->getFeature()->getGeometry();
   if (!geometry)
     return;
   if (geometry->size() != originalAltitude_.size())
@@ -1375,15 +1375,15 @@ void FeatureNodeInterface::setExtrude(bool extrude)
 {
   if (extrude)
   {
-    osgEarth::Symbology::AltitudeSymbol* alt = style_.getOrCreate<osgEarth::Symbology::AltitudeSymbol>();
-    alt->clamping() = osgEarth::Symbology::AltitudeSymbol::CLAMP_RELATIVE_TO_TERRAIN;
-    alt->technique() = osgEarth::Symbology::AltitudeSymbol::TECHNIQUE_SCENE;
+    osgEarth::AltitudeSymbol* alt = style_.getOrCreate<osgEarth::AltitudeSymbol>();
+    alt->clamping() = osgEarth::AltitudeSymbol::CLAMP_RELATIVE_TO_TERRAIN;
+    alt->technique() = osgEarth::AltitudeSymbol::TECHNIQUE_SCENE;
   }
   else
   {
-    osgEarth::Symbology::AltitudeSymbol* alt = style_.getOrCreate<osgEarth::Symbology::AltitudeSymbol>();
+    osgEarth::AltitudeSymbol* alt = style_.getOrCreate<osgEarth::AltitudeSymbol>();
     if (alt)
-      alt->clamping() = osgEarth::Symbology::AltitudeSymbol::CLAMP_NONE;
+      alt->clamping() = osgEarth::AltitudeSymbol::CLAMP_NONE;
   }
   GogNodeInterface::setExtrude(extrude);
 }
@@ -1407,15 +1407,15 @@ void FeatureNodeInterface::setTessellation(TessellationStyle style)
   // tessellation only applies to Features
   bool tessellate = true;
   if (style == TESSELLATE_RHUMBLINE)
-    featureNode_->getFeature()->geoInterp() = osgEarth::Symbology::GEOINTERP_RHUMB_LINE;
+    featureNode_->getFeature()->geoInterp() = osgEarth::GEOINTERP_RHUMB_LINE;
   else if (style == TESSELLATE_GREAT_CIRCLE_PROJECTION)
-    featureNode_->getFeature()->geoInterp() = osgEarth::Symbology::GEOINTERP_GREAT_CIRCLE;
+    featureNode_->getFeature()->geoInterp() = osgEarth::GEOINTERP_GREAT_CIRCLE;
   else if (style == TESSELLATE_NONE)
     tessellate = false;
 
-  if (!style_.has<osgEarth::Symbology::LineSymbol>())
+  if (!style_.has<osgEarth::LineSymbol>())
     return;
-  osgEarth::Symbology::LineSymbol* ls = style_.getSymbol<osgEarth::Symbology::LineSymbol>();
+  osgEarth::LineSymbol* ls = style_.getSymbol<osgEarth::LineSymbol>();
 
   if (tessellate)
   {
@@ -1425,7 +1425,7 @@ void FeatureNodeInterface::setTessellation(TessellationStyle style)
     double tessellationSpacingM = 10000.0;
 
     // adjust tessellation based on feature dimension
-    const osgEarth::Features::Feature* feature = featureNode_->getFeature();
+    const osgEarth::Feature* feature = featureNode_->getFeature();
     if (feature != NULL)
     {
       const osgEarth::SpatialReference* srs = feature->getSRS();
@@ -1464,7 +1464,7 @@ void FeatureNodeInterface::setAltitudeMode(AltitudeMode altMode)
   // The altitude mode combinations applied here should match those in the hasValidAltitudeMode() method. Update both methods with changes.
   setExtrude(altMode == ALTITUDE_EXTRUDE);
 
-  if (style_.has<osgEarth::Symbology::ExtrusionSymbol>())
+  if (style_.has<osgEarth::ExtrusionSymbol>())
   {
     // Assertion failure means failure in setExtrude()
     assert(altMode == ALTITUDE_EXTRUDE);
@@ -1474,18 +1474,18 @@ void FeatureNodeInterface::setAltitudeMode(AltitudeMode altMode)
   switch (altMode)
   {
   case ALTITUDE_NONE:
-    style_.getOrCreate<osgEarth::Symbology::AltitudeSymbol>()->clamping() = osgEarth::Symbology::AltitudeSymbol::CLAMP_NONE;
-    style_.getOrCreate<osgEarth::Symbology::AltitudeSymbol>()->technique() = osgEarth::Symbology::AltitudeSymbol::TECHNIQUE_GPU;
+    style_.getOrCreate<osgEarth::AltitudeSymbol>()->clamping() = osgEarth::AltitudeSymbol::CLAMP_NONE;
+    style_.getOrCreate<osgEarth::AltitudeSymbol>()->technique() = osgEarth::AltitudeSymbol::TECHNIQUE_GPU;
     break;
   case ALTITUDE_GROUND_CLAMPED:
-    style_.getOrCreate<osgEarth::Symbology::AltitudeSymbol>()->clamping() = osgEarth::Symbology::AltitudeSymbol::CLAMP_TO_TERRAIN;
-    style_.getOrCreate<osgEarth::Symbology::AltitudeSymbol>()->technique() = osgEarth::Symbology::AltitudeSymbol::TECHNIQUE_SCENE;
-    style_.getOrCreate<osgEarth::Symbology::RenderSymbol>()->depthOffset()->automatic() = true;
+    style_.getOrCreate<osgEarth::AltitudeSymbol>()->clamping() = osgEarth::AltitudeSymbol::CLAMP_TO_TERRAIN;
+    style_.getOrCreate<osgEarth::AltitudeSymbol>()->technique() = osgEarth::AltitudeSymbol::TECHNIQUE_SCENE;
+    style_.getOrCreate<osgEarth::RenderSymbol>()->depthOffset()->automatic() = true;
     break;
   case ALTITUDE_GROUND_RELATIVE:
-    style_.getOrCreate<osgEarth::Symbology::AltitudeSymbol>()->clamping() = osgEarth::Symbology::AltitudeSymbol::CLAMP_RELATIVE_TO_TERRAIN;
-    style_.getOrCreate<osgEarth::Symbology::AltitudeSymbol>()->technique() = osgEarth::Symbology::AltitudeSymbol::TECHNIQUE_SCENE;
-    style_.getOrCreate<osgEarth::Symbology::RenderSymbol>()->depthOffset()->automatic() = true;
+    style_.getOrCreate<osgEarth::AltitudeSymbol>()->clamping() = osgEarth::AltitudeSymbol::CLAMP_RELATIVE_TO_TERRAIN;
+    style_.getOrCreate<osgEarth::AltitudeSymbol>()->technique() = osgEarth::AltitudeSymbol::TECHNIQUE_SCENE;
+    style_.getOrCreate<osgEarth::RenderSymbol>()->depthOffset()->automatic() = true;
     break;
   case ALTITUDE_EXTRUDE:
     // Shouldn't get here; failure in setExtrude()
@@ -1503,7 +1503,7 @@ void FeatureNodeInterface::adjustAltitude_()
 
 void FeatureNodeInterface::serializeGeometry_(bool relativeShape, std::ostream& gogOutputStream) const
 {
-  osgEarth::Symbology::Geometry* geometry = featureNode_->getFeature()->getGeometry();
+  osgEarth::Geometry* geometry = featureNode_->getFeature()->getGeometry();
   if (!geometry)
     return;
 
@@ -1514,7 +1514,7 @@ void FeatureNodeInterface::serializeGeometry_(bool relativeShape, std::ostream& 
   }
 
   // since we may have applied an altitude offset, get the original altitude values before serializing
-  osgEarth::Symbology::Geometry originalGeometry = *geometry;
+  osgEarth::Geometry originalGeometry = *geometry;
   for (size_t i = 0; i < originalGeometry.size(); ++i)
   {
     originalGeometry[i].z() = originalAltitude_.at(i);
@@ -1522,7 +1522,7 @@ void FeatureNodeInterface::serializeGeometry_(bool relativeShape, std::ostream& 
   Utils::serializeShapeGeometry(&originalGeometry, relativeShape, gogOutputStream);
 }
 
-void FeatureNodeInterface::setStyle_(const osgEarth::Symbology::Style& style)
+void FeatureNodeInterface::setStyle_(const osgEarth::Style& style)
 {
   if (&style != &style_)
     style_ = style;
@@ -1537,7 +1537,7 @@ void FeatureNodeInterface::setStyle_(const osgEarth::Symbology::Style& style)
 
 ///////////////////////////////////////////////////////////////////
 
-LocalGeometryNodeInterface::LocalGeometryNodeInterface(osgEarth::Annotation::LocalGeometryNode* localNode, const simVis::GOG::GogMetaData& metaData)
+LocalGeometryNodeInterface::LocalGeometryNodeInterface(osgEarth::LocalGeometryNode* localNode, const simVis::GOG::GogMetaData& metaData)
   : GogNodeInterface(localNode, metaData),
     localNode_(localNode)
 {
@@ -1590,12 +1590,12 @@ void LocalGeometryNodeInterface::adjustAltitude_()
 
 void LocalGeometryNodeInterface::serializeGeometry_(bool relativeShape, std::ostream& gogOutputStream) const
 {
-  const osgEarth::Symbology::Geometry* geometry = localNode_->getGeometry();
+  const osgEarth::Geometry* geometry = localNode_->getGeometry();
   if (geometry)
     Utils::serializeShapeGeometry(geometry, relativeShape, gogOutputStream);
 }
 
-void LocalGeometryNodeInterface::setStyle_(const osgEarth::Symbology::Style& style)
+void LocalGeometryNodeInterface::setStyle_(const osgEarth::Style& style)
 {
   if (&style != &style_)
     style_ = style;
@@ -1607,7 +1607,7 @@ void LocalGeometryNodeInterface::setStyle_(const osgEarth::Symbology::Style& sty
 
 ///////////////////////////////////////////////////////////////////
 
-LabelNodeInterface::LabelNodeInterface(osgEarth::Annotation::LabelNode* labelNode, const simVis::GOG::GogMetaData& metaData)
+LabelNodeInterface::LabelNodeInterface(osgEarth::LabelNode* labelNode, const simVis::GOG::GogMetaData& metaData)
   : GogNodeInterface(labelNode, metaData),
     labelNode_(labelNode)
 {
@@ -1624,7 +1624,7 @@ LabelNodeInterface::LabelNodeInterface(osgEarth::Annotation::LabelNode* labelNod
   simVis::OverheadMode::enableGeometryFlattening(false, labelNode);
 }
 
-LabelNodeInterface::LabelNodeInterface(osgEarth::Annotation::PlaceNode* placeNode, const simVis::GOG::GogMetaData& metaData)
+LabelNodeInterface::LabelNodeInterface(osgEarth::PlaceNode* placeNode, const simVis::GOG::GogMetaData& metaData)
   : GogNodeInterface(placeNode, metaData),
     labelNode_(placeNode)
 {
@@ -1643,9 +1643,9 @@ LabelNodeInterface::LabelNodeInterface(osgEarth::Annotation::PlaceNode* placeNod
 
 int LabelNodeInterface::getFont(std::string& fontFile, int& fontSize, osg::Vec4f& fontColor) const
 {
-  if (!style_.has<osgEarth::Symbology::TextSymbol>())
+  if (!style_.has<osgEarth::TextSymbol>())
     return 1;
-  const osgEarth::Symbology::TextSymbol* ts = style_.getSymbol<osgEarth::Symbology::TextSymbol>();
+  const osgEarth::TextSymbol* ts = style_.getSymbol<osgEarth::TextSymbol>();
   if (ts->font()->size() > 0)
     fontFile = *(ts->font());
   fontSize = static_cast<int>(simVis::simdisFontSize(static_cast<float>(ts->size()->eval())));
@@ -1660,9 +1660,9 @@ int LabelNodeInterface::getPosition(osg::Vec3d& position, osgEarth::GeoPoint* re
 
 int LabelNodeInterface::getTextOutline(bool& draw, osg::Vec4f& outlineColor) const
 {
-  if (!style_.has<osgEarth::Symbology::TextSymbol>())
+  if (!style_.has<osgEarth::TextSymbol>())
     return 1;
-  const osgEarth::Symbology::TextSymbol* ts = style_.getSymbol<osgEarth::Symbology::TextSymbol>();
+  const osgEarth::TextSymbol* ts = style_.getSymbol<osgEarth::TextSymbol>();
 
   // draw state is defined by the halo color alpha value (4th item in the color array)
   draw = (ts->halo().isSet() && ts->halo()->color()[3] != 0.f);
@@ -1672,7 +1672,7 @@ int LabelNodeInterface::getTextOutline(bool& draw, osg::Vec4f& outlineColor) con
 
 void LabelNodeInterface::setFont(const std::string& fontName, int fontSize, const osg::Vec4f& color)
 {
-  osgEarth::Symbology::TextSymbol* ts = style_.getOrCreate<osgEarth::Symbology::TextSymbol>();
+  osgEarth::TextSymbol* ts = style_.getOrCreate<osgEarth::TextSymbol>();
   if (!ts)
     return;
 
@@ -1698,7 +1698,7 @@ void LabelNodeInterface::setFont(const std::string& fontName, int fontSize, cons
 void LabelNodeInterface::setTextOutline(bool draw, const osg::Vec4f& outlineColor)
 {
   outlineColor_ = outlineColor;
-  osgEarth::Symbology::TextSymbol* ts = style_.getOrCreate<osgEarth::Symbology::TextSymbol>();
+  osgEarth::TextSymbol* ts = style_.getOrCreate<osgEarth::TextSymbol>();
   if (!ts)
     return;
 
@@ -1726,7 +1726,7 @@ void LabelNodeInterface::serializeKeyword_(std::ostream& gogOutputStream) const
   // nothing to do, labels include the keyword in their text value element
 }
 
-void LabelNodeInterface::setStyle_(const osgEarth::Symbology::Style& style)
+void LabelNodeInterface::setStyle_(const osgEarth::Style& style)
 {
   if (&style != &style_)
     style_ = style;
@@ -1738,7 +1738,7 @@ void LabelNodeInterface::setStyle_(const osgEarth::Symbology::Style& style)
 
 //////////////////////////////////////////////
 
-CylinderNodeInterface::CylinderNodeInterface(osg::Group* groupNode, osgEarth::Annotation::LocalGeometryNode* sideNode, osgEarth::Annotation::LocalGeometryNode* topCapNode, osgEarth::Annotation::LocalGeometryNode* bottomCapNode, const simVis::GOG::GogMetaData& metaData)
+CylinderNodeInterface::CylinderNodeInterface(osg::Group* groupNode, osgEarth::LocalGeometryNode* sideNode, osgEarth::LocalGeometryNode* topCapNode, osgEarth::LocalGeometryNode* bottomCapNode, const simVis::GOG::GogMetaData& metaData)
   : GogNodeInterface(groupNode, metaData),
     sideNode_(sideNode),
     topCapNode_(topCapNode),
@@ -1746,9 +1746,9 @@ CylinderNodeInterface::CylinderNodeInterface(osg::Group* groupNode, osgEarth::An
     height_(0.0)
 {
   // height is from the side node's extrusion height, altitude is from side node's altitude
-  if (sideNode_.valid() && sideNode_->getStyle().has<osgEarth::Annotation::ExtrusionSymbol>())
+  if (sideNode_.valid() && sideNode_->getStyle().has<osgEarth::ExtrusionSymbol>())
   {
-    height_ = sideNode_->getStyle().getSymbol<osgEarth::Annotation::ExtrusionSymbol>()->height().value();
+    height_ = sideNode_->getStyle().getSymbol<osgEarth::ExtrusionSymbol>()->height().value();
     initializeFromGeoPositionNode_(*sideNode);
   }
 
@@ -1757,7 +1757,7 @@ CylinderNodeInterface::CylinderNodeInterface(osg::Group* groupNode, osgEarth::An
     // use style of the cap, since that will contain the line and other style options that matters for updating the characteristics of the cylinder
     style_ = topCapNode_->getStyle();
     // fill state is determined by the cap node's fill state
-    filled_ = topCapNode_->getStyle().has<osgEarth::Annotation::PolygonSymbol>();
+    filled_ = topCapNode_->getStyle().has<osgEarth::PolygonSymbol>();
     initializeAltitudeSymbol_();
   }
 
@@ -1798,7 +1798,7 @@ void CylinderNodeInterface::serializeGeometry_(bool relativeShape, std::ostream&
   // Cylinder can't serialize its geometry, serialization of center, radius, height is stored in the meta data
 }
 
-void CylinderNodeInterface::setStyle_(const osgEarth::Symbology::Style& style)
+void CylinderNodeInterface::setStyle_(const osgEarth::Style& style)
 {
   if (&style != &style_)
     style_ = style;
@@ -1809,33 +1809,33 @@ void CylinderNodeInterface::setStyle_(const osgEarth::Symbology::Style& style)
     return;
 
   // format style for the side node
-  osgEarth::Symbology::Style sideStyle = style_;
+  osgEarth::Style sideStyle = style_;
   // need to add the extrusion symbol to the side style
-  sideStyle.getOrCreate<osgEarth::Annotation::ExtrusionSymbol>()->height() = height_;
+  sideStyle.getOrCreate<osgEarth::ExtrusionSymbol>()->height() = height_;
   // In some cases it appears that extrusion can cause lighting
-  sideStyle.getOrCreate<osgEarth::Symbology::RenderSymbol>()->lighting() = false;
+  sideStyle.getOrCreate<osgEarth::RenderSymbol>()->lighting() = false;
   // need to remove the line symbol from the side style
-  sideStyle.remove<osgEarth::Symbology::LineSymbol>();
+  sideStyle.remove<osgEarth::LineSymbol>();
   // if not filled, need to make sure the side node has a fill color that matches the line color
-  if (!filled_ && style_.has<osgEarth::Annotation::LineSymbol>())
-    sideStyle.getOrCreate<osgEarth::Annotation::PolygonSymbol>()->fill()->color() = style_.getSymbol<osgEarth::Annotation::LineSymbol>()->stroke()->color();
+  if (!filled_ && style_.has<osgEarth::LineSymbol>())
+    sideStyle.getOrCreate<osgEarth::PolygonSymbol>()->fill()->color() = style_.getSymbol<osgEarth::LineSymbol>()->stroke()->color();
 
   // If we are filled, then side's backface culling should be unset; if unfilled, then it should be set false
   if (filled_)
-    sideStyle.getOrCreate<osgEarth::Symbology::RenderSymbol>()->backfaceCulling().unset();
+    sideStyle.getOrCreate<osgEarth::RenderSymbol>()->backfaceCulling().unset();
   else
-    sideStyle.getOrCreate<osgEarth::Symbology::RenderSymbol>()->backfaceCulling() = false;
+    sideStyle.getOrCreate<osgEarth::RenderSymbol>()->backfaceCulling() = false;
   sideNode_->setStyle(sideStyle);
 
   // can't have an extrusion symbol for the cap nodes
-  style_.remove<osgEarth::Symbology::ExtrusionSymbol>();
+  style_.remove<osgEarth::ExtrusionSymbol>();
   topCapNode_->setStyle(style_);
   bottomCapNode_->setStyle(style_);
 }
 
 //////////////////////////////////////////////
 
-ArcNodeInterface::ArcNodeInterface(osg::Group* groupNode, osgEarth::Annotation::LocalGeometryNode* shapeNode, osgEarth::Annotation::LocalGeometryNode* fillNode, const simVis::GOG::GogMetaData& metaData)
+ArcNodeInterface::ArcNodeInterface(osg::Group* groupNode, osgEarth::LocalGeometryNode* shapeNode, osgEarth::LocalGeometryNode* fillNode, const simVis::GOG::GogMetaData& metaData)
   : GogNodeInterface(groupNode, metaData),
     shapeNode_(shapeNode),
     fillNode_(fillNode)
@@ -1851,9 +1851,9 @@ ArcNodeInterface::ArcNodeInterface(osg::Group* groupNode, osgEarth::Annotation::
   osg::Node::NodeMask mask = simVis::DISPLAY_MASK_NONE;
   if (fillNode_.valid())
   {
-    if (fillNode_->getStyle().has<osgEarth::Symbology::PolygonSymbol>())
+    if (fillNode_->getStyle().has<osgEarth::PolygonSymbol>())
     {
-      fillColor_ = fillNode_->getStyle().getSymbol<osgEarth::Symbology::PolygonSymbol>()->fill()->color();
+      fillColor_ = fillNode_->getStyle().getSymbol<osgEarth::PolygonSymbol>()->fill()->color();
       if (fillColor_[3] > 0.f)
         mask = simVis::DISPLAY_MASK_GOG;
     }
@@ -1887,7 +1887,7 @@ void ArcNodeInterface::serializeGeometry_(bool relativeShape, std::ostream& gogO
   // Arc can't serialize its geometry, serialization for center and radius is stored in the meta data
 }
 
-void ArcNodeInterface::setStyle_(const osgEarth::Symbology::Style& style)
+void ArcNodeInterface::setStyle_(const osgEarth::Style& style)
 {
   if (&style != &style_)
     style_ = style;
@@ -1898,15 +1898,15 @@ void ArcNodeInterface::setStyle_(const osgEarth::Symbology::Style& style)
     return;
 
   // format style for the shape node
-  osgEarth::Symbology::Style shapeStyle = style_;
+  osgEarth::Style shapeStyle = style_;
 
   // shape node must remove the PolygonSymbol if not extruded
-  if (shapeStyle.has<osgEarth::Symbology::PolygonSymbol>() && !extruded_)
-    shapeStyle.remove<osgEarth::Symbology::PolygonSymbol>();
+  if (shapeStyle.has<osgEarth::PolygonSymbol>() && !extruded_)
+    shapeStyle.remove<osgEarth::PolygonSymbol>();
 
   // shape node should not have a polygon symbol if not extruded
   if (!extruded_)
-    assert(!shapeStyle.has<osgEarth::Symbology::PolygonSymbol>());
+    assert(!shapeStyle.has<osgEarth::PolygonSymbol>());
 
   shapeNode_->setStyle(shapeStyle);
 
@@ -1914,12 +1914,12 @@ void ArcNodeInterface::setStyle_(const osgEarth::Symbology::Style& style)
     return;
 
   // can't have a line symbol for the fill node
-  osgEarth::Symbology::Style fillStyle = style_;
-  fillStyle.remove<osgEarth::Symbology::LineSymbol>();
+  osgEarth::Style fillStyle = style_;
+  fillStyle.remove<osgEarth::LineSymbol>();
   fillNode_->setStyle(fillStyle);
 }
 
-SphericalNodeInterface::SphericalNodeInterface(osgEarth::Annotation::LocalGeometryNode* localNode, const simVis::GOG::GogMetaData& metaData)
+SphericalNodeInterface::SphericalNodeInterface(osgEarth::LocalGeometryNode* localNode, const simVis::GOG::GogMetaData& metaData)
   : LocalGeometryNodeInterface(localNode, metaData)
 {
 }
@@ -1989,7 +1989,7 @@ void SphericalNodeInterface::setColor_(const osg::Vec4f& color)
   geometry->setColorArray(colorArray);
 }
 
-void SphericalNodeInterface::setStyle_(const osgEarth::Symbology::Style& style)
+void SphericalNodeInterface::setStyle_(const osgEarth::Style& style)
 {
   LocalGeometryNodeInterface::setStyle_(style);
   if (deferringStyleUpdates_() || !localNode_)
@@ -2002,11 +2002,11 @@ void SphericalNodeInterface::setStyle_(const osgEarth::Symbology::Style& style)
     return;
 
   // Pull out the render symbol
-  const osgEarth::Symbology::RenderSymbol* render = style_.get<osgEarth::Symbology::RenderSymbol>();
+  const osgEarth::RenderSymbol* render = style_.get<osgEarth::RenderSymbol>();
   if (!render)
     return;
 
-  // Subset of osgEarth::AnnotationNode::applyRenderSymbology() supported out of the box
+  // Subset of osgEarthNode::applyRenderSymbology() supported out of the box
 
   if (render->depthTest().isSet())
   {

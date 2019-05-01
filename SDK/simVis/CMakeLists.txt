@@ -337,7 +337,7 @@ if(HAVE_OSGEARTH_POINTDRAWABLE_CHECKSHAREDSTATESET)
     set(SDK_OSGEARTH_VERSION_PATCH 0)
 else()
     # Newer than 1.8.0 release adds GeodeticLabelingEngine file and getResolution()
-    check_osgearth_method_exists(HAVE_OSGEARTH_GEOLABELENGINE "osgEarthUtil/GeodeticLabelingEngine" "getResolution")
+    check_osgearth_method_exists(HAVE_OSGEARTH_GEOLABELENGINE "osgEarth/GeodeticLabelingEngine" "getResolution")
     if(HAVE_OSGEARTH_GEOLABELENGINE)
         # Next anticipated version is 1.9.0
         set(SDK_OSGEARTH_VERSION_MAJOR 1)

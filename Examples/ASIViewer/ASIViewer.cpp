@@ -43,7 +43,7 @@
 #include "simUtil/ExampleResources.h"
 
 #include <osgEarth/StringUtils>
-#include <osgEarthUtil/Controls>
+#include <osgEarth/Controls>
 #include <osg/ImageStream>
 
 namespace ui = osgEarth::Util::Controls;
@@ -927,7 +927,7 @@ int main(int argc, char **argv)
   /// add some stock OSG handlers
   viewer->installDebugHandlers();
 
-  viewer->getSceneManager()->setSkyNode(osgEarth::Util::SkyNode::create());
+  viewer->getSceneManager()->setSkyNode(osgEarth::SkyNode::create());
 
   double last_t = 0.0;
   while (!viewer->getViewer()->done())

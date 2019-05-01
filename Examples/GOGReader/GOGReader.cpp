@@ -28,10 +28,10 @@
 
 #include "osgEarth/NodeUtils"
 #include "osgEarth/optional"
-#include "osgEarthAnnotation/PlaceNode"
-#include "osgEarthAnnotation/LabelNode"
-#include "osgEarthUtil/Controls"
-#include "osgEarthUtil/MouseCoordsTool"
+#include "osgEarth/PlaceNode"
+#include "osgEarth/LabelNode"
+#include "osgEarth/Controls"
+#include "osgEarth/MouseCoordsTool"
 
 #include "simNotify/Notify.h"
 #include "simCore/Common/Version.h"
@@ -58,7 +58,7 @@ namespace ui = osgEarth::Util::Controls;
 using namespace osgEarth;
 using namespace osgEarth::Util;
 using namespace osgEarth::Util::Controls;
-using namespace osgEarth::Annotation;
+using namespace osgEarth;
 
 typedef std::shared_ptr<simVis::GOG::GogNodeInterface> GogNodeInterfacePtr;
 static std::vector<GogNodeInterfacePtr> s_overlayNodes;

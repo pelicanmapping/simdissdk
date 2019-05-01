@@ -22,7 +22,7 @@
 #include <iomanip>
 #include <set>
 
-#include "osgEarthAnnotation/LocalGeometryNode"
+#include "osgEarth/LocalGeometryNode"
 
 #include "simNotify/Notify.h"
 #include "simCore/Common/Exception.h"
@@ -45,7 +45,7 @@
 using namespace simVis;
 using namespace simVis::GOG;
 using namespace osgEarth;
-using namespace osgEarth::Symbology;
+using namespace osgEarth;
 
 
 namespace

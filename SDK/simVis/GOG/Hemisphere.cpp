@@ -19,10 +19,10 @@
  * disclose, or release this software.
  *
  */
-#include "osgEarthSymbology/GeometryFactory"
-#include "osgEarthFeatures/GeometryCompiler"
-#include "osgEarthAnnotation/AnnotationUtils"
-#include "osgEarthAnnotation/LocalGeometryNode"
+#include "osgEarth/GeometryFactory"
+#include "osgEarth/GeometryCompiler"
+#include "osgEarth/AnnotationUtils"
+#include "osgEarth/LocalGeometryNode"
 #include "simCore/Calc/Angle.h"
 #include "simCore/Calc/Math.h"
 #include "simNotify/Notify.h"
@@ -48,15 +48,15 @@ GogNodeInterface* Hemisphere::deserialize(const ParsedShape& parsedShape,
 
   float radius_m = radius.as(osgEarth::Units::METERS);
 
-  osg::Node* shape = osgEarth::Annotation::AnnotationUtils::createHemisphere(
+  osg::Node* shape = osgEarth::AnnotationUtils::createHemisphere(
     radius_m, color);
   shape->setName("GOG Hemisphere");
 
-  osgEarth::Annotation::LocalGeometryNode* node = NULL;
+  osgEarth::LocalGeometryNode* node = NULL;
 
   if (nodeType == GOGNODE_GEOGRAPHIC)
   {
-    node = new osgEarth::Annotation::LocalGeometryNode();
+    node = new osgEarth::LocalGeometryNode();
     node->setMapNode(mapNode);
     node->setPosition(p.getMapPosition());
     node->getPositionAttitudeTransform()->addChild(shape);

@@ -25,11 +25,7 @@
 #include <vector>
 #include "osg/ref_ptr"
 #include "osgEarth/Version"
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
 #include "osgEarth/Color"
-#else
-#include "osgEarthSymbology/Color"
-#endif
 #include "simCore/Common/Common.h"
 
 namespace simVis
@@ -46,7 +42,7 @@ namespace simVis
 #if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
   typedef osgEarth::Color Color;
 #else
-  typedef osgEarth::Symbology::Color Color;
+  typedef osgEarth::Color Color;
 #endif
 
 

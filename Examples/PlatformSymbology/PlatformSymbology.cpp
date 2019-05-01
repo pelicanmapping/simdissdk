@@ -60,14 +60,14 @@
 #include "simUtil/ExampleResources.h"
 
 #include "osgEarth/StringUtils"
-#include "osgEarthSymbology/Style"
-#include "osgEarthUtil/LatLongFormatter"
-#include "osgEarthUtil/MGRSFormatter"
+#include "osgEarth/Style"
+#include "osgEarth/LatLongFormatter"
+#include "osgEarth/MGRSFormatter"
 
 #include "google/protobuf/stubs/common.h"
 
 using namespace osgEarth;
-using namespace osgEarth::Symbology;
+using namespace osgEarth;
 using namespace osgEarth::Util;
 using namespace osgEarth::Util::Controls;
 

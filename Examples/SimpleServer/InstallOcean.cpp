@@ -26,7 +26,7 @@
 #include "osgEarth/TerrainEngineNode"
 
 #if OSGEARTH_VERSION_LESS_THAN(3,0,0)
-#include "osgEarthUtil/Ocean"
+#include "osgEarth/Ocean"
 #endif
 
 // Potentially defines HAVE_TRITON_NODEKIT, include first
@@ -42,7 +42,7 @@
 #if SDK_OSGEARTH_VERSION_LESS_THAN(1,10,0)
 #include "osgEarthDrivers/ocean_simple/SimpleOceanOptions"
 #else
-#include "osgEarthUtil/SimpleOceanLayer"
+#include "osgEarth/SimpleOceanLayer"
 #endif
 
 #include "simVis/BathymetryGenerator.h"
@@ -124,7 +124,6 @@ void InstallOcean::install(simVis::SceneManager& scene)
 #ifdef HAVE_TRITON_NODEKIT
   if (type_ == TRITON)
   {
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
     osg::ref_ptr<osgEarth::Triton::TritonLayer> layer = new osgEarth::Triton::TritonLayer();
     layer->setUserName(user_);
     layer->setLicenseCode(license_);
@@ -132,20 +131,6 @@ void InstallOcean::install(simVis::SceneManager& scene)
     layer->setUseHeightMap(false);
     layer->setMaxAltitude(30000.0f);
     layer->setRenderBinNumber(simVis::BIN_OCEAN);
-#else
-    osgEarth::Triton::TritonOptions triton;
-    if (!user_.empty())
-      triton.user() = user_;
-    if (!license_.empty())
-      triton.licenseCode() = license_;
-    if (!resourcePath_.empty())
-      triton.resourcePath() = resourcePath_;
-
-    triton.useHeightMap() = false;
-    triton.maxAltitude() = 30000.0f;
-    triton.renderBinNumber() = simVis::BIN_OCEAN;
-    osg::ref_ptr<osgEarth::Triton::TritonLayer> layer = new osgEarth::Triton::TritonLayer(triton);
-#endif
     
     // Configure it to work in overhead mode
     simVis::OverheadMode::configureOceanLayer(layer.get());
@@ -156,37 +141,10 @@ void InstallOcean::install(simVis::SceneManager& scene)
   else // type_ == SIMPLE
 #endif
   {
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
-    osgEarth::Util::SimpleOceanLayer* ocean = new osgEarth::Util::SimpleOceanLayer();
+    osgEarth::SimpleOceanLayer* ocean = new osgEarth::SimpleOceanLayer();
     ocean->getOrCreateStateSet()->setRenderBinDetails(simVis::BIN_OCEAN, simVis::BIN_GLOBAL_SIMSDK);
     ocean->setUseBathymetry(false);
     ocean->setMaxAltitude(30000.0f);
-#else
-#if SDK_OSGEARTH_VERSION_LESS_THAN(1,10,0)
-    osgEarth::Drivers::SimpleOcean::SimpleOceanOptions ocean;
-    ocean.lowFeatherOffset() = 0.0f;
-    ocean.highFeatherOffset() = 1.0f;
-    ocean.renderBinNumber() = simVis::BIN_OCEAN;
-#else
-    osgEarth::Util::SimpleOceanLayerOptions ocean;
-    // To get similar behavior as old ocean_simple driver, useBathymetry() == false helps
-    ocean.useBathymetry() = false;
-    ocean.maxAltitude() = 30000.0f;
-    osg::ref_ptr<osgEarth::Layer> layer = new osgEarth::Util::SimpleOceanLayer(ocean);
-#endif
-
-    // Configure it to work in overhead mode
-    simVis::OverheadMode::configureOceanLayer(layer.get());
-
-    // Control the ocean's rendering order so we can see underwater objects:
-    layer->getOrCreateStateSet()->setRenderBinDetails(simVis::BIN_OCEAN, simVis::BIN_GLOBAL_SIMSDK);
-
-    // Do not apply the bathymetry generator when drawing the ocean surface:
-    layer->getOrCreateStateSet()->setDefine("SIMVIS_IGNORE_BATHYMETRY_GEN");
-
-    // Add to the map.
-    scene.getMap()->addLayer(layer.get());
-#endif
   }
 }
 

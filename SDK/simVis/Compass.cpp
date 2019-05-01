@@ -20,7 +20,7 @@
  *
  */
 #include "osgEarth/NodeUtils"
-#include "osgEarthAnnotation/AnnotationUtils"
+#include "osgEarth/AnnotationUtils"
 #include "simCore/Calc/Angle.h"
 #include "simCore/Calc/Math.h"
 #include "simCore/String/Constants.h"
@@ -157,7 +157,7 @@ void CompassNode::initCompass_(const std::string& compassFilename)
   addChild(compassImageXform_);
   if (image.valid())
   {
-    osg::Geometry* compass = osgEarth::Annotation::AnnotationUtils::createImageGeometry(
+    osg::Geometry* compass = osgEarth::AnnotationUtils::createImageGeometry(
       image.get(),
       osg::Vec2s(0, 0),            // pixel offsets from center
       0,                           // texture image unit
@@ -228,7 +228,7 @@ void CompassNode::initWindVane_()
   {
     // Scale the image to expected size
     image->scaleImage(WIND_VANE_SCALE_X, WIND_VANE_SCALE_Y, 1);
-    osg::Geometry* windVane = osgEarth::Annotation::AnnotationUtils::createImageGeometry(
+    osg::Geometry* windVane = osgEarth::AnnotationUtils::createImageGeometry(
       image.get(),
       osg::Vec2s(0, 0),   // pixel offsets from center
       0,                  // texture image unit

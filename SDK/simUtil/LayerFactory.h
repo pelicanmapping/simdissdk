@@ -27,7 +27,7 @@
 #include "osg/Vec4f"
 #include "simCore/Common/Common.h"
 #include "osgEarth/Version"
-#include "osgEarthFeatures/FeatureModelLayer"
+#include "osgEarth/FeatureModelLayer"
 
 namespace osgEarth
 {
@@ -37,12 +37,7 @@ namespace osgEarth
   class ImageLayer;
   class Profile;
   class TileSourceOptions;
-
-  namespace Features
-  {
-    //class FeatureModelLayer;
-  }
-  namespace Symbology { class Style; }
+  class Style;
 }
 
 namespace simUtil {
@@ -70,19 +65,11 @@ public:
    * @return Image layer on success; NULL on failure.  Caller responsible for memory.
    *   (put in ref_ptr)
    */
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
   static osgEarth::ImageLayer* newImageLayer(
     const std::string& layerName,
     const osgEarth::ConfigOptions& options,
     const osgEarth::Profile* mapProfile,
     const osgEarth::CachePolicy* cachePolicy = NULL);
-#else
-  static osgEarth::ImageLayer* newImageLayer(
-    const std::string& layerName,
-    const osgEarth::TileSourceOptions& options,
-    const osgEarth::Profile* mapProfile,
-    const osgEarth::CachePolicy* cachePolicy=NULL);
-#endif
 
   /**
    * Factory method for creating a new elevation layer.
@@ -95,19 +82,11 @@ public:
    * @return Elevation layer on success; NULL on failure.  Caller responsible for memory.
    *   (put in ref_ptr)
    */
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
   static osgEarth::ElevationLayer* newElevationLayer(
     const std::string& layerName,
     const osgEarth::ConfigOptions& options,
     const osgEarth::CachePolicy* cachePolicy = NULL,
     const osgEarth::ConfigOptions* extraOptions = NULL);
-#else
-  static osgEarth::ElevationLayer* newElevationLayer(
-    const std::string& layerName,
-    const osgEarth::TileSourceOptions& options,
-    const osgEarth::CachePolicy* cachePolicy=NULL,
-    const osgEarth::ElevationLayerOptions* extraOptions=NULL);
-#endif
 
   /**
    * Factory method for creating a new feature model layer.
@@ -115,11 +94,7 @@ public:
    * @return Feature model layer on success; NULL on failure.  Caller responsible for memory.
    *   (put in ref_ptr)
    */
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
-  static osgEarth::Features::FeatureModelLayer* newFeatureLayer(const osgEarth::Features::FeatureModelLayer::Options& options);
-#else
-  static osgEarth::Features::FeatureModelLayer* newFeatureLayer(const osgEarth::Features::FeatureModelLayerOptions& options);
-#endif
+  static osgEarth::FeatureModelLayer* newFeatureLayer(const osgEarth::FeatureModelLayer::Options& options);
 };
 
 /** Simplified factory interface to load line-based shape files. */
@@ -130,14 +105,10 @@ public:
   virtual ~ShapeFileLayerFactory();
 
   /** Creates a new layer given the URL provided. */
-  osgEarth::Features::FeatureModelLayer* load(const std::string& url) const;
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+  osgEarth::FeatureModelLayer* load(const std::string& url) const;
+
   /** Helper method that fills out the model layer options based on URL and current configuration. */
-  void configureOptions(const std::string& url, osgEarth::Features::FeatureModelLayer* layer) const;
-#else
-  /** Helper method that fills out the model layer options based on URL and current configuration. */
-  void configureOptions(const std::string& url, osgEarth::Features::FeatureModelLayerOptions& driver) const;
-#endif
+  void configureOptions(const std::string& url, osgEarth::FeatureModelLayer* layer) const;
 
   /** Changes the line color for the next loaded layer. */
   void setLineColor(const osg::Vec4f& color);
@@ -147,7 +118,7 @@ public:
   void setStipple(unsigned short pattern, unsigned int factor);
 
 private:
-  std::unique_ptr<osgEarth::Symbology::Style> style_;
+  std::unique_ptr<osgEarth::Style> style_;
 };
 
 }

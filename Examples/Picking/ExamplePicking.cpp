@@ -221,13 +221,13 @@ public:
     }
 
     // Try to find an annotation node child and change its attributes
-    osgEarth::Annotation::AnnotationNode* anno =
-      osgEarth::findTopMostNodeOfType<osgEarth::Annotation::AnnotationNode>(app_.picker->pickedNode());
+    osgEarth::AnnotationNode* anno =
+      osgEarth::findTopMostNodeOfType<osgEarth::AnnotationNode>(app_.picker->pickedNode());
     if (!anno)
       return false;
 
     auto style = anno->getStyle();
-    auto lineSymbol = style.getOrCreateSymbol<osgEarth::Symbology::LineSymbol>();
+    auto lineSymbol = style.getOrCreateSymbol<osgEarth::LineSymbol>();
     // Change some line aspects to indicate we picked correctly
     lineSymbol->stroke()->color() = randomColor();
     lineSymbol->stroke()->width() = randomBetween(1.0, 7.0);

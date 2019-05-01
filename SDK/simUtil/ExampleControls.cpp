@@ -20,13 +20,9 @@
  *
  */
 #include "osgEarth/Version"
-#include "osgEarthUtil/Controls"
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
+#include "osgEarth/Controls"
 #include "osgEarth/Color"
-#else
-#include "osgEarthSymbology/Color"
-#endif
-#include "osgEarthAnnotation/LabelNode"
+#include "osgEarth/LabelNode"
 
 #include "osgEarth/ScreenSpaceLayout"
 
@@ -39,8 +35,8 @@
 #include "simUtil/ExampleControls.h"
 
 using namespace osgEarth;
-using namespace osgEarth::Annotation;
-using namespace osgEarth::Symbology;
+using namespace osgEarth;
+using namespace osgEarth;
 using namespace osgEarth::Util::Controls;
 
 namespace

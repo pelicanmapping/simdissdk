@@ -19,10 +19,10 @@
  * disclose, or release this software.
  *
  */
-#include "osgEarthSymbology/GeometryFactory"
-#include "osgEarthFeatures/GeometryCompiler"
-#include "osgEarthAnnotation/FeatureNode"
-#include "osgEarthAnnotation/LocalGeometryNode"
+#include "osgEarth/GeometryFactory"
+#include "osgEarth/GeometryCompiler"
+#include "osgEarth/FeatureNode"
+#include "osgEarth/LocalGeometryNode"
 #include "simVis/GOG/LineSegs.h"
 #include "simVis/GOG/GogNodeInterface.h"
 #include "simVis/GOG/HostedLocalGeometryNode.h"
@@ -32,8 +32,8 @@
 #define LC "[GOG::LineSegs] "
 
 using namespace simVis::GOG;
-using namespace osgEarth::Features;
-using namespace osgEarth::Annotation;
+using namespace osgEarth;
+using namespace osgEarth;
 
 GogNodeInterface* LineSegs::deserialize(const ParsedShape& parsedShape,
                       simVis::GOG::ParserData& p,

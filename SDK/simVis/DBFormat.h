@@ -23,7 +23,6 @@
 #define SIMDIS_DB_LAYERS_H 1
 
 #include "osgEarth/Version"
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
 
 #include <string>
 #include "osgEarth/ImageLayer"
@@ -41,58 +40,6 @@
 namespace simVis
 {
   using namespace osgEarth;
-
-#if 0
-  //! Namespace for internal driver classes
-  namespace DB
-  {
-    class SDKVIS_EXPORT Options
-    {
-    public:
-      OE_OPTION(URI, url);
-      OE_OPTION(unsigned, deepestLevel);
-      void readFrom(const Config&);
-      void writeTo(Config&) const;
-    };
-
-    /**
-      * Underlying driver for reading/writing a DB format file
-      */
-    class SDKVIS_EXPORT Driver
-    {
-    public:
-      Status open(
-        const URI& uri,
-        osg::ref_ptr<const Profile>& profile,
-        DataExtentList& dataExtents,
-        const osgDB::Options* readOptions);
-
-      ReadResult read(
-        const TileKey& key,
-        ProgressCallback* progress,
-        const osgDB::Options* readOptions) const;
-
-    private:
-      std::string pathname_;
-      DB::Options* options_;
-      sqlite3* db_;
-      int rasterFormat_;
-      int pixelLength_;
-      int shallowLevel_;
-      int deepLevel_;
-      PosXPosYExtents extents_[6];
-      std::string source_;
-      std::string classification_;
-      std::string description_;
-      bool timeSpecified_;
-      simCore::TimeStamp timeStamp_;
-      osg::ref_ptr<osgDB::ReaderWriter> pngReader_;
-      osg::ref_ptr<osgDB::ReaderWriter> jpgReader_;
-      osg::ref_ptr<osgDB::ReaderWriter> tifReader_;
-      osg::ref_ptr<osgDB::ReaderWriter> rgbReader_;
-    };
-  }  
-#endif
 
   //........................................................................
 
@@ -187,7 +134,5 @@ namespace simVis
   };
 
 }
-
-#endif // osgEarth 3.0+
 
 #endif // SIMDIS_DB_LAYERS_H

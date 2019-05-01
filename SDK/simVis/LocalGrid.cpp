@@ -29,11 +29,7 @@
 #include "osgEarth/Version"
 #include "osgEarth/Registry"
 #include "osgEarth/ShaderGenerator"
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
 #include "osgEarth/Color"
-#else
-#include "osgEarthSymbology/Color"
-#endif
 
 #include "simCore/Calc/Math.h"
 #include "simNotify/Notify.h"

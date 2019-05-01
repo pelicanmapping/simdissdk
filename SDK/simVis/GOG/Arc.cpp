@@ -20,10 +20,10 @@
  *
  */
 #include "osgEarth/MapNode"
-#include "osgEarthAnnotation/LocalGeometryNode"
-#include "osgEarthFeatures/Feature"
-#include "osgEarthFeatures/GeometryCompiler"
-#include "osgEarthSymbology/GeometryFactory"
+#include "osgEarth/LocalGeometryNode"
+#include "osgEarth/Feature"
+#include "osgEarth/GeometryCompiler"
+#include "osgEarth/GeometryFactory"
 #include "simNotify/Notify.h"
 #include "simCore/Common/Common.h"
 #include "simCore/Calc/Angle.h"
@@ -37,7 +37,7 @@
 #include "simVis/GOG/Utils.h"
 
 using namespace simVis::GOG;
-using namespace osgEarth::Features;
+using namespace osgEarth;
 
 namespace
 {
@@ -184,7 +184,7 @@ Geometry* createArc(const osg::Vec3d& center,
                           const Distance&   innerRadius,
                           bool              drawPie,
                           Geometry*         geomToUse,
-                          osgEarth::Symbology::GeometryFactory&  gf)
+                          osgEarth::GeometryFactory&  gf)
 {
   if (drawDonut)
     return createDonut(center, radius, innerRadius, start, end, geomToUse);
@@ -202,7 +202,7 @@ Geometry* createEllipticalArc(const osg::Vec3d& center,
                           const Distance&   innerRadius,
                           bool              drawPie,
                           Geometry*         geomToUse,
-                          osgEarth::Symbology::GeometryFactory&  gf)
+                          osgEarth::GeometryFactory&  gf)
 {
   if (drawDonut)
     return createEllipticalDonut(center, radiusMajor, radiusMinor, innerRadius, rotationAngle, start, end, geomToUse);
@@ -287,9 +287,9 @@ GogNodeInterface* Arc::deserialize(const ParsedShape& parsedShape, simVis::GOG::
 
   // whether to include the center point in the geometry.
   bool filled = p.style_.has<PolygonSymbol>();
-  osgEarth::Symbology::GeometryFactory gf;
+  osgEarth::GeometryFactory gf;
   Geometry* outlineShape = (Geometry*)new LineString();
-  Geometry* filledShape = (Geometry*)new osgEarth::Symbology::Polygon();
+  Geometry* filledShape = (Geometry*)new osgEarth::Polygon();
 
   if (parsedShape.hasValue(GOG_MAJORAXIS))
   {
@@ -312,8 +312,8 @@ GogNodeInterface* Arc::deserialize(const ParsedShape& parsedShape, simVis::GOG::
     filledShape = createArc(osg::Vec3d(0, 0, 0), radius, start + rotation, end + rotation, hasInnerRadius, iRadius, true, filledShape, gf);
   }
 
-  osgEarth::Annotation::LocalGeometryNode* shapeNode = NULL;
-  osgEarth::Annotation::LocalGeometryNode* fillNode = NULL;
+  osgEarth::LocalGeometryNode* shapeNode = NULL;
+  osgEarth::LocalGeometryNode* fillNode = NULL;
   osg::Group* g = new osg::Group();
 
   // remove the polygon symbol for the shape, since it should only exist in the fillNode
@@ -332,10 +332,10 @@ GogNodeInterface* Arc::deserialize(const ParsedShape& parsedShape, simVis::GOG::
       Utils::configureStyleForClipping(fillStyle);
     }
 
-    shapeNode = new osgEarth::Annotation::LocalGeometryNode(outlineShape, shapeStyle);
+    shapeNode = new osgEarth::LocalGeometryNode(outlineShape, shapeStyle);
     shapeNode->setMapNode(mapNode);
 
-    fillNode = new osgEarth::Annotation::LocalGeometryNode(filledShape, fillStyle);
+    fillNode = new osgEarth::LocalGeometryNode(filledShape, fillStyle);
     fillNode->setMapNode(mapNode);
   }
   else

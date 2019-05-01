@@ -25,7 +25,7 @@
 #include <string>
 #include "osg/ref_ptr"
 #include "osg/Referenced"
-#include "osgEarthSymbology/Style"
+#include "osgEarth/Style"
 #include "simCore/Calc/Vec3.h"
 #include "simCore/Common/Common.h"
 #include "simData/ObjectId.h"
@@ -134,15 +134,15 @@ public:
   * Retrieves the LineGraphic's label component.
   * @return simVis::AnimatedLineNode representing the label component of the LineGraphic.
   */
-  osgEarth::Annotation::LabelNode* label() const;
+  osgEarth::LabelNode* label() const;
 
 private:
   osg::Group* scene_;
 
   osg::ref_ptr<osgEarth::SpatialReference> wgs84Srs_;
   osg::ref_ptr<simVis::AnimatedLineNode> animatedLine_;
-  osgEarth::Symbology::Style labelStyle_;
-  osg::ref_ptr<osgEarth::Annotation::LabelNode> label_;
+  osgEarth::Style labelStyle_;
+  osg::ref_ptr<osgEarth::LabelNode> label_;
   int displayMask_;
 };
 

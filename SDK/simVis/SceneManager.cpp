@@ -36,13 +36,8 @@
 #include "osgEarth/ModelLayer"
 #include "osgEarth/ObjectIndex"
 #include "osgEarth/ScreenSpaceLayout"
-#include "osgEarthUtil/LODBlending"
 
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
 #include "osgEarth/TerrainOptions"
-#else
-#include "osgEarthDrivers/engine_rex/RexTerrainEngineOptions"
-#endif
 
 #if OSGEARTH_MIN_VERSION_REQUIRED(2,10,0)
 #include "osgEarth/HorizonClipPlane"
@@ -208,16 +203,9 @@ void SceneManager::init_()
   if (!noAsyncLoad || strncmp(noAsyncLoad, "0", 1) == 0)
     addChild(simVis::Registry::instance()->modelCache()->asyncLoaderNode());
 
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
   osgEarth::MapNode* mapNode = new osgEarth::MapNode();
   SceneManager::initializeTerrainOptions(mapNode);
   setMapNode(mapNode);
-#else
-  // Configure the default terrain options
-  osgEarth::Drivers::RexTerrainEngine::RexTerrainEngineOptions options;
-  SceneManager::initializeTerrainOptions(options);
-  setMapNode(new osgEarth::MapNode(options));
-#endif
 
   // TODO: Re-evaluate
   // getOrCreateStateSet()->setDefine("OE_TERRAIN_RENDER_NORMAL_MAP", osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
@@ -287,7 +275,7 @@ void SceneManager::setScenarioDisplayHints(const ScenarioDisplayHints& hints)
 }
 #endif /* USE_DEPRECATED_SIMDISSDK_API */
 
-void SceneManager::setSkyNode(osgEarth::Util::SkyNode* skyNode)
+void SceneManager::setSkyNode(osgEarth::SkyNode* skyNode)
 {
   // don't load sky model to minimize memory usage when checking memory
   if (simVis::Registry::instance()->isMemoryCheck())
@@ -317,7 +305,7 @@ void SceneManager::setSkyNode(osgEarth::Util::SkyNode* skyNode)
   }
 }
 
-bool SceneManager::isSilverLining_(const osgEarth::Util::SkyNode* skyNode) const
+bool SceneManager::isSilverLining_(const osgEarth::SkyNode* skyNode) const
 {
   if (skyNode == NULL)
     return false;
@@ -426,15 +414,9 @@ void SceneManager::setMap(osgEarth::Map* map)
   }
   else
   {
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
     osgEarth::MapNode* mapNode = new osgEarth::MapNode();
     SceneManager::initializeTerrainOptions(mapNode);
     setMapNode(mapNode);
-#else
-    osgEarth::Drivers::RexTerrainEngine::RexTerrainEngineOptions options;
-    SceneManager::initializeTerrainOptions(options);
-    setMapNode(new osgEarth::MapNode(map, options));
-#endif
   }
 }
 
@@ -468,11 +450,7 @@ void SceneManager::updateImageLayers_(const osgEarth::Map& newMap, osgEarth::Map
 
     if (loadedLayerIter == loadedLayerHash.end())
     {
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
       if ((*iter)->getStatus().isOK())
-#else
-      if ((*iter)->getTileSource() != NULL && (*iter)->getTileSource()->isOK())
-#endif
 
 #if SDK_OSGEARTH_MIN_VERSION_REQUIRED(1,6,0)
         currentMap->addLayer(iter->get());
@@ -532,11 +510,7 @@ void SceneManager::updateElevationLayers_(const osgEarth::Map& newMap, osgEarth:
     std::string layerHash = getLayerHash_(iter->get());
     if (loadedLayerHash.find(layerHash) == loadedLayerHash.end())
     {
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
       if ((*iter)->getStatus().isOK())
-#else
-      if ((*iter)->getTileSource() != NULL && iter->get()->getTileSource()->isOK())
-#endif
 
 #if SDK_OSGEARTH_MIN_VERSION_REQUIRED(1,6,0)
         currentMap->addLayer(iter->get());
@@ -676,23 +650,9 @@ void SceneManager::setGlobeColor(const simVis::Color& color)
   globeColor_->set(color);
 }
 
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
 void SceneManager::initializeTerrainOptions(osgEarth::MapNode* mapNode)
 {
   // Default options for the Rex engine can be initialized here.
   // These options apply to the default map loaded on initialization.
 }
-#else
-#ifdef USE_DEPRECATED_SIMDISSDK_API
-void SceneManager::initializeTerrainOptions(osgEarth::Drivers::MPTerrainEngine::MPTerrainEngineOptions& options)
-{
-  SIM_WARN << "The MP Terrain engine is no longer supported.\n";
-}
-#endif
 
-void SceneManager::initializeTerrainOptions(osgEarth::Drivers::RexTerrainEngine::RexTerrainEngineOptions& options)
-{
-  // Default options for the Rex engine can be initialized here.
-  // These options apply to the default map loaded on initialization.
-}
-#endif

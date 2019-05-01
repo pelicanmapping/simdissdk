@@ -33,7 +33,7 @@
 #include "osgEarth/CullingUtils"
 #include "osgEarth/Revisioning"
 #if OSGEARTH_VERSION_LESS_THAN(3,0,0)
-#include "osgEarthUtil/SpatialData"
+#include "osgEarth/SpatialData"
 #endif
 #include "simVis/ScenarioDataStoreAdapter.h"
 #include "simVis/Types.h"

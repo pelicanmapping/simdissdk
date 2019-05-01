@@ -38,12 +38,7 @@ simCore::Vec3 ViewpointPositions::centerLla(const osgEarth::Viewpoint& vp)
   // Check the Tethered case first
   if (vp.nodeIsSet())
   {
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
     osg::ref_ptr<osg::Node> node = vp.getNode();
-#else
-    osg::ref_ptr<osg::Node> node;
-    vp.getNode(node);
-#endif
     if (node.valid())
       return simVis::computeNodeGeodeticPosition(node.get());
   }

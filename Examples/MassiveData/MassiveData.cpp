@@ -30,7 +30,7 @@
 #include "osgViewer/Viewer"
 #include "osgViewer/ViewerEventHandlers"
 
-#include "osgEarthUtil/Controls"
+#include "osgEarth/Controls"
 
 #include "simNotify/Notify.h"
 #include "simCore/String/ValidNumber.h"

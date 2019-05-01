@@ -21,7 +21,7 @@
 *
 */
 #include "osgEarth/GeoMath"
-#include "osgEarthAnnotation/LabelNode"
+#include "osgEarth/LabelNode"
 #include "simCore/Calc/Angle.h"
 #include "simCore/Calc/CoordinateConverter.h"
 #include "simVis/Types.h"
@@ -59,12 +59,12 @@ LineGraphic::LineGraphic(osg::Group* scene, osgEarth::MapNode* mapNode)
   animatedLine_->getOrCreateStateSet()->setRenderBinDetails(simVis::BIN_ANIMATEDLINE, simVis::BIN_GLOBAL_SIMSDK);
 
   // Set up the label node default style
-  osg::ref_ptr<osgEarth::Symbology::TextSymbol> text = labelStyle_.getOrCreate<osgEarth::Symbology::TextSymbol>();
+  osg::ref_ptr<osgEarth::TextSymbol> text = labelStyle_.getOrCreate<osgEarth::TextSymbol>();
   text->fill()->color() = DEFAULT_TEXTCOLOR;
   text->halo()->color() = simVis::Color::Black;
-  text->alignment() = osgEarth::Symbology::TextSymbol::ALIGN_CENTER_CENTER;
+  text->alignment() = osgEarth::TextSymbol::ALIGN_CENTER_CENTER;
   text->haloOffset() = simVis::outlineThickness(simData::TO_THICK);
-  osg::ref_ptr<osgEarth::Symbology::RenderSymbol> render = labelStyle_.getOrCreate<osgEarth::Symbology::RenderSymbol>();
+  osg::ref_ptr<osgEarth::RenderSymbol> render = labelStyle_.getOrCreate<osgEarth::RenderSymbol>();
   render->lighting() = false;
   text->size() = simVis::osgFontSize(DEFAULT_FONTSIZE);
   text->font() = simVis::Registry::instance()->findFontFile(DEFAULT_FONT);
@@ -72,7 +72,7 @@ LineGraphic::LineGraphic(osg::Group* scene, osgEarth::MapNode* mapNode)
   text->declutter() = false;
 
   // Create the label node itself
-  label_ = new osgEarth::Annotation::LabelNode();
+  label_ = new osgEarth::LabelNode();
   label_->setMapNode(mapNode);
   label_->setStyle(labelStyle_);
   label_->setDynamic(true);
@@ -180,19 +180,19 @@ void LineGraphic::setLineColor(const simVis::Color& color)
 
 void LineGraphic::setTextColor(const simVis::Color& color)
 {
-  labelStyle_.getOrCreate<osgEarth::Symbology::TextSymbol>()->fill()->color() = color;
+  labelStyle_.getOrCreate<osgEarth::TextSymbol>()->fill()->color() = color;
   label_->setStyle(labelStyle_);
 }
 
 void LineGraphic::setFont(const std::string& fontName)
 {
-  labelStyle_.getOrCreate<osgEarth::Symbology::TextSymbol>()->font() = simVis::Registry::instance()->findFontFile(fontName);
+  labelStyle_.getOrCreate<osgEarth::TextSymbol>()->font() = simVis::Registry::instance()->findFontFile(fontName);
   label_->setStyle(labelStyle_);
 }
 
 void LineGraphic::setFontSize(float fontSize)
 {
-  labelStyle_.getOrCreate<osgEarth::Symbology::TextSymbol>()->size() = simVis::osgFontSize(fontSize);
+  labelStyle_.getOrCreate<osgEarth::TextSymbol>()->size() = simVis::osgFontSize(fontSize);
   label_->setStyle(labelStyle_);
 }
 
@@ -201,7 +201,7 @@ simVis::AnimatedLineNode* LineGraphic::animatedLine() const
   return animatedLine_.get();
 }
 
-osgEarth::Annotation::LabelNode* LineGraphic::label() const
+osgEarth::LabelNode* LineGraphic::label() const
 {
   return label_.get();
 }

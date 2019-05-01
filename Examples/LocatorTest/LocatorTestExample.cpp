@@ -28,10 +28,10 @@
 
 #include "osgEarth/StringUtils"
 #include "simVis/LineDrawable.h"
-#include "osgEarthSymbology/Style"
-#include "osgEarthUtil/LatLongFormatter"
-#include "osgEarthUtil/MGRSFormatter"
-#include "osgEarthAnnotation/LabelNode"
+#include "osgEarth/Style"
+#include "osgEarth/LatLongFormatter"
+#include "osgEarth/MGRSFormatter"
+#include "osgEarth/LabelNode"
 
 #include "simCore/Common/Version.h"
 #include "simCore/Common/HighPerformanceGraphics.h"
@@ -54,10 +54,10 @@
 #include "simUtil/ExampleResources.h"
 
 using namespace osgEarth;
-using namespace osgEarth::Symbology;
+using namespace osgEarth;
 using namespace osgEarth::Util;
 using namespace osgEarth::Util::Controls;
-using namespace osgEarth::Annotation;
+using namespace osgEarth;
 
 
 /// keep a handle, for toggling

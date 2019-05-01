@@ -19,11 +19,11 @@
  * disclose, or release this software.
  *
  */
-#include "osgEarthSymbology/Geometry"
-#include "osgEarthSymbology/GeometryFactory"
-#include "osgEarthFeatures/GeometryCompiler"
-#include "osgEarthAnnotation/FeatureNode"
-#include "osgEarthAnnotation/LocalGeometryNode"
+#include "osgEarth/Geometry"
+#include "osgEarth/GeometryFactory"
+#include "osgEarth/GeometryCompiler"
+#include "osgEarth/FeatureNode"
+#include "osgEarth/LocalGeometryNode"
 #include "simVis/GOG/Points.h"
 #include "simVis/GOG/GogNodeInterface.h"
 #include "simVis/GOG/HostedLocalGeometryNode.h"
@@ -33,8 +33,8 @@
 #define LC "[GOG::PointSet] "
 
 using namespace simVis::GOG;
-using namespace osgEarth::Features;
-using namespace osgEarth::Annotation;
+using namespace osgEarth;
+using namespace osgEarth;
 
 GogNodeInterface* Points::deserialize(const ParsedShape& parsedShape,
                     simVis::GOG::ParserData& p,
@@ -43,7 +43,7 @@ GogNodeInterface* Points::deserialize(const ParsedShape& parsedShape,
                     const GogMetaData&       metaData,
                     osgEarth::MapNode*       mapNode)
 {
-  p.parseGeometry<osgEarth::Symbology::PointSet>(parsedShape);
+  p.parseGeometry<osgEarth::PointSet>(parsedShape);
 
   // Extruded points are not supported in osgEarth; replace with line segments
   const bool isExtruded = parsedShape.boolValue(GOG_EXTRUDE, false);

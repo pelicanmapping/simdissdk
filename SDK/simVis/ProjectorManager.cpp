@@ -45,13 +45,7 @@ ProjectorManager::ProjectorLayer::ProjectorLayer(simData::ObjectId id)
   : osgEarth::Layer(),
     id_(id)
 {
-#if OSGEARTH_MIN_VERSION_REQUIRED(3,0,0)
   setRenderType(RENDERTYPE_TERRAIN_SURFACE);
-#else
-#if SDK_OSGEARTH_MIN_VERSION_REQUIRED(1,6,0)
-  setRenderType(osgEarth::Layer::RENDERTYPE_TILE);
-#endif
-#endif
 }
 
 simData::ObjectId ProjectorManager::ProjectorLayer::id() const
