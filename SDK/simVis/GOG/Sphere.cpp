@@ -32,8 +32,7 @@
 #include "simVis/GOG/Sphere.h"
 #include "simVis/GOG/Utils.h"
 
-using namespace simVis::GOG;
-
+namespace simVis { namespace GOG {
 
 GogNodeInterface* Sphere::deserialize(const ParsedShape& parsedShape,
                     simVis::GOG::ParserData& p,
@@ -76,3 +75,5 @@ GogNodeInterface* Sphere::deserialize(const ParsedShape& parsedShape,
   }
   return rv;
 }
+
+} }

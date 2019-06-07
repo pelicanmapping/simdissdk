@@ -19,21 +19,34 @@
  * disclose, or release this software.
  *
  */
-#ifndef SIMCORE_STRING_CONSTANTS_H
-#define SIMCORE_STRING_CONSTANTS_H
+#ifndef QCOLORGRADIENTPLUGIN_H
+#define QCOLORGRADIENTPLUGIN_H
 
-#include <string>
+#include <QDesignerCustomWidgetInterface>
 
-namespace simCore
+// Wrapper class for the ColorGradientWidget to provide QDesignerCustomWidgetInterface
+class ColorGradientWidgetPlugin : public QObject, public QDesignerCustomWidgetInterface
 {
-  /// Common white space characters encountered during string parsing
-  static const std::string STR_WHITE_SPACE_CHARS = " \n\r\t";
+  Q_OBJECT;
+  Q_INTERFACES(QDesignerCustomWidgetInterface);
 
-  // Character constants for degree symbol; Qt requires UTF8. 
-  static const std::string STR_DEGREE_SYMBOL_ASCII = "\xB0";      ///< ASCII degree symbol value
-  static const std::string STR_DEGREE_SYMBOL_UNICODE = "\u00B0";  ///< Unicode degree symbol value
-  static const std::string STR_DEGREE_SYMBOL_UTF8 = "\xC2\xB0";   ///< UTF-8 degree symbol value
+public:
+  explicit ColorGradientWidgetPlugin(QObject *parent = 0);
 
-} // namespace simCore
+  bool isContainer() const;
+  bool isInitialized() const;
+  QIcon icon() const;
+  QString domXml() const;
+  QString group() const;
+  QString includeFile() const;
+  QString name() const;
+  QString toolTip() const;
+  QString whatsThis() const;
+  QWidget *createWidget(QWidget *parent);
+  void initialize(QDesignerFormEditorInterface *core);
 
-#endif /* SIMCORE_STRING_CONSTANTS_H */
+private:
+  bool initialized_;
+};
+
+#endif // QCOLORGRADIENTPLUGIN_H

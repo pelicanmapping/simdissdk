@@ -32,7 +32,7 @@
 #include "simVis/GOG/ParsedShape.h"
 #include "simVis/GOG/Utils.h"
 
-using namespace simVis::GOG;
+namespace simVis { namespace GOG {
 
 GogNodeInterface* Ellipsoid::deserialize(const ParsedShape& parsedShape,
                        simVis::GOG::ParserData& p,
@@ -86,3 +86,5 @@ GogNodeInterface* Ellipsoid::deserialize(const ParsedShape& parsedShape,
   }
   return rv;
 }
+
+} }

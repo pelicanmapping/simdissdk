@@ -63,8 +63,6 @@
 
 #define LC "[SceneManager] "
 
-using namespace simVis;
-
 //------------------------------------------------------------------------
 namespace
 {
@@ -91,6 +89,8 @@ namespace
     }
   };
 }
+
+namespace simVis {
 
 SceneManager::SceneManager()
   : hasEngineDriverProblem_(false)
@@ -656,3 +656,4 @@ void SceneManager::initializeTerrainOptions(osgEarth::MapNode* mapNode)
   // These options apply to the default map loaded on initialization.
 }
 
+}

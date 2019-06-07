@@ -52,9 +52,9 @@
 
 #define LC "[PlatformModel] "
 
-using namespace simVis;
 using namespace osgEarth;
 
+namespace simVis {
 
 /** OSG Mask for traversal (like the select type in SIMDIS 9) */
 const int PlatformModelNode::TRAVERSAL_MASK = simVis::DISPLAY_MASK_PLATFORM_MODEL;
@@ -925,3 +925,4 @@ void PlatformModelNode::fireCallbacks_(Callback::EventType eventType)
     i->get()->operator()(this, eventType);
 }
 
+}

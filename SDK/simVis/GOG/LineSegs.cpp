@@ -31,9 +31,10 @@
 
 #define LC "[GOG::LineSegs] "
 
-using namespace simVis::GOG;
 using namespace osgEarth;
 using namespace osgEarth;
+
+namespace simVis { namespace GOG {
 
 GogNodeInterface* LineSegs::deserialize(const ParsedShape& parsedShape,
                       simVis::GOG::ParserData& p,
@@ -93,3 +94,5 @@ GogNodeInterface* LineSegs::deserialize(const ParsedShape& parsedShape,
     rv->applyToStyle(parsedShape, p.units_);
   return rv;
 }
+
+} }
