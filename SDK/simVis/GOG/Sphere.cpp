@@ -25,7 +25,6 @@
 #include "simNotify/Notify.h"
 #include "simCore/Calc/Angle.h"
 #include "simCore/Calc/Math.h"
-#include "simVis/Types.h"
 #include "simVis/GOG/GogNodeInterface.h"
 #include "simVis/GOG/HostedLocalGeometryNode.h"
 #include "simVis/GOG/ParsedShape.h"
@@ -43,10 +42,16 @@ GogNodeInterface* Sphere::deserialize(const ParsedShape& parsedShape,
 {
   osgEarth::Distance radius(p.units_.rangeUnits_.convertTo(simCore::Units::METERS, parsedShape.doubleValue(GOG_RADIUS, 1000.0)), osgEarth::Units::METERS);
 
-  osg::Vec4f color(simVis::Color::White);
+  osg::Vec4f color(osgEarth::Color::White);
 
   float radius_m = radius.as(osgEarth::Units::METERS);
 
+  // cannot create a sphere with no radius
+  if (radius_m <= 0.f)
+  {
+    SIM_WARN << "Cannot create sphere with no radius\n";
+    return NULL;
+  }
   osg::Node* shape = osgEarth::AnnotationUtils::createSphere(
     radius_m, color);
   shape->setName("GOG Sphere");

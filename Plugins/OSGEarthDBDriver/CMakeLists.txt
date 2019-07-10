@@ -42,6 +42,9 @@ if(SDK_BIG_ENDIAN)
 else()
     target_compile_definitions(osgdb_osgearth_db PRIVATE SIM_LITTLE_ENDIAN)
 endif()
+if(NOT WIN32)
+    target_compile_definitions(osgdb_osgearth_db PRIVATE Linux)
+endif()
 
 set_target_properties(osgdb_osgearth_db PROPERTIES
     PREFIX ""

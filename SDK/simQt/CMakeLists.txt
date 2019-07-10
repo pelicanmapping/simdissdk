@@ -305,7 +305,7 @@ if(TARGET simVis)
     )
 
     # Gl3FormatGuesser depends on OpenGL libraries
-    target_link_libraries(simQt PRIVATE ${OPENGL_LIBRARIES})
+    target_link_libraries(simQt PRIVATE VSI::GL)
 endif()
 
 # Link against OpenGL if OSGQT is found to support simQt::ViewWidget
@@ -345,12 +345,20 @@ else()
 endif()
 
 if(INSTALL_SIMDIS_SDK_LIBRARIES)
-    set_target_properties(simQt PROPERTIES TARGET_EXPORT_NAME "SIMDIS_SDK")
-    vsi_install_target(simQt SDK_Library)
+    # Configure the simQtConfig.cmake file; its dependencies are dynamic
+    set(SIMQT_DEPENDS)
+    foreach(TGT IN ITEMS simNotify simCore simData simVis)
+        if(TARGET ${TGT})
+            set(SIMQT_DEPENDS "${SIMQT_DEPENDS}\nfind_dependency(${TGT})")
+        endif()
+    endforeach()
+    configure_file(simQtConfig.cmake.in simQtConfig.cmake @ONLY)
+
+    vsi_install_export(simQt ${SIMDIS_SDK_VERSION_STRING} AnyNewerVersion)
 endif()
 
 if(AUTOINSTALL_LIBS AND SIMQT_SHARED)
-    PostBuildInstallSdkSharedObjects(simQt)
+    PostBuildInstallSharedObjects(simQt)
 endif()
 
 if(INSTALL_HEADERS)

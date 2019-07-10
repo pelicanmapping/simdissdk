@@ -19,15 +19,23 @@ Operating systems officially supported by the SIMDIS SDK:
 Compilers officially supported by the SIMDIS SDK:
 
 * Windows compilers:
-  - Microsoft Visual C++ 2013 (VC12)
-  - Microsoft Visual C++ 2015 (VC14)
+  - Microsoft Visual C++ 2013 (VC-12.0)
+  - Microsoft Visual C++ 2015 (VC-14.0)
+  - Microsoft Visual C++ 2017 (VC-14.1)
+  - Microsoft Visual C++ 2019 (VC-14.2)
 * Linux compilers:
-  - GCC 4.x series
+  - GCC, minimum 4.4
 
 Other compiler combinations may work, or could work with minimal improvements
 to the CMake configuration.  This is only a list of the systems that we internally
 are able to support.  We are glad to accept pull requests supporting new
 compilers.
+
+C++-11 support will be mandatory for SIMDIS SDK compilers starting after
+September 2019, after the 1.11 release.  This will eliminate support for
+GCC 4.4.  RHEL 6 users can continue to build the SIMDIS SDK by using the
+devtoolset package from the RHEL SCL, in order to use an ABI-compatible
+compiler with newer language support.
 
 
 Third Party Dependencies
@@ -35,14 +43,14 @@ Third Party Dependencies
 The SIMDIS SDK depends on the following third party libraries:
 
 - [OpenSceneGraph 3.6+](http://www.openscenegraph.org)
-- [osgEarth 2.9+](http://www.osgearth.org)
+- [osgEarth 2.10+](http://www.osgearth.org)
 - [protobuf 2.6+](http://code.google.com/p/protobuf)
 - [Qt 5.5+](http://qt-project.org)
 - [SQLite 3.8+](http://www.sqlite.org)
 
 
-Other versions may also work, such as Qt 4.7.  But we can only support the
-configurations that we build against.
+While other versions may also work, we can only support the configurations
+that we build against.
 
 Precompiled Windows binaries for all of the SIMDIS SDK dependencies can be
 obtained from the SIMDIS SDK project download page.  Linux users may find that

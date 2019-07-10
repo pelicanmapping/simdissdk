@@ -14,6 +14,7 @@ create_test_sourcelist(SimCoreTestFiles SimCoreTests.cpp
     VersionTest.cpp
     CoreCommonTest.cpp
     CalculationTest.cpp
+    GarsTest.cpp
     MathTest.cpp
     MgrsTest.cpp
     SquareMatrixTest.cpp
@@ -56,6 +57,7 @@ add_test(NAME CoreCommonTest COMMAND SimCoreTests CoreCommonTest)
 add_test(NAME CalculationTest COMMAND SimCoreTests CalculationTest)
 add_test(NAME CoreMathTest COMMAND SimCoreTests MathTest)
 add_test(NAME CoreSquareMatrixTest COMMAND SimCoreTests SquareMatrixTest)
+add_test(NAME CoreGarsTest COMMAND SimCoreTests GarsTest)
 add_test(NAME CoreMgrsTest COMMAND SimCoreTests MgrsTest)
 add_test(NAME CoreTimeClassTest COMMAND SimCoreTests TimeClassTest)
 add_test(NAME CoreInterpolationTest COMMAND SimCoreTests InterpolationTest)
@@ -81,4 +83,4 @@ find_file(RCSFILE fake_rcs_3.rcs PATHS ${FILE_LOCATIONS})
 mark_as_advanced(RCSFILE)
 if(EXISTS ${RCSFILE})
     add_test(NAME CoreEMTest COMMAND SimCoreTests EMTest ${RCSFILE})
-endif(EXISTS ${RCSFILE})
+endif()

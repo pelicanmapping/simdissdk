@@ -140,7 +140,7 @@ target_include_directories(simUtil PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 target_link_libraries(simUtil PUBLIC simVis simData simCore)
-target_link_libraries(simUtil PRIVATE ${OPENGL_LIBRARIES})
+target_link_libraries(simUtil PRIVATE VSI::GL)
 if(SIMUTIL_SHARED)
     target_compile_definitions(simUtil PRIVATE simUtil_LIB_EXPORT_SHARED)
 else()
@@ -149,8 +149,7 @@ endif()
 
 
 if(INSTALL_SIMDIS_SDK_LIBRARIES)
-    set_target_properties(simUtil PROPERTIES TARGET_EXPORT_NAME "SIMDIS_SDK")
-    vsi_install_target(simUtil SDK_Library)
+    vsi_install_export(simUtil ${SIMDIS_SDK_VERSION_STRING} AnyNewerVersion)
 endif()
 
 if(OSGEARTH_TRITON_SUPPORT STREQUAL "NODEKIT" AND TARGET OSGEARTH_TRITON)
@@ -171,7 +170,7 @@ if(INSTALL_SIMDIS_SDK_SHADERS)
 endif()
 
 if(AUTOINSTALL_LIBS AND SIMUTIL_SHARED)
-    PostBuildInstallSdkSharedObjects(simUtil)
+    PostBuildInstallSharedObjects(simUtil)
 endif()
 
 if(INSTALL_HEADERS)
