@@ -34,7 +34,7 @@ void oe_GPULinesProj_VS_MODEL(inout vec4 unused)
 #pragma import_defines(OE_GPULINES_USE_LIMITS)
 #pragma import_defines(OE_GPU_CLAMPING)
 
-uniform vec2 oe_ViewportSize;
+uniform vec3 oe_Camera;
 
 in vec3 oe_GPULines_prev;
 in vec3 oe_GPULines_next;
@@ -62,7 +62,7 @@ void oe_GPULinesProj_VS_CLIP(inout vec4 currClip)
 #endif
 
     vec2 arVec = vec2(
-        oe_ViewportSize.x/oe_ViewportSize.y,
+        oe_Camera.x/oe_Camera.y,
         1.0);
 
 #ifdef OE_GPU_CLAMPING
@@ -159,7 +159,7 @@ void oe_GPULinesProj_VS_CLIP(inout vec4 currClip)
     vec2 extrudePixels = vec2(-dir.y, dir.x) * len;
 
     // and convert to unit space:
-    vec2 extrudeUnit = extrudePixels / oe_ViewportSize;
+    vec2 extrudeUnit = extrudePixels / oe_Camera.xy;
 
     // and from that make a clip-coord offset vector
     vec4 offset = vec4(extrudeUnit*orientation*currClip.w, 0.0, 0.0);

@@ -1,19 +1,24 @@
 # Setup SQLite library
 # Setting the SQLITE3_DIR environment variable will allow use of a custom built library
 
-set(SQLITE_VERSION 3.8.11.1)
+set(SQLITE_VERSION 3.29.0)
 
 # Setup search paths
 initialize_ENV(SQLITE3_DIR)
 set(INCLUDE_DIRS 
     ${SQLITE3_DIR}/include
+    ${SQLITE3_DIR}/include/sqlite
     $ENV{SQLITE3_DIR}/include
+    $ENV{SQLITE3_DIR}/include/sqlite
     $ENV{SQLITE_DIR}/include
+    $ENV{SQLITE_DIR}/include/sqlite
     ${THIRD_DIR}/SQLite/${SQLITE_VERSION}/include
+    ${THIRD_DIR}/SQLite/${SQLITE_VERSION}/include/sqlite
     ${THIRD_DIR}/sqlite-${SQLITE_VERSION}/include
+    ${THIRD_DIR}/sqlite-${SQLITE_VERSION}/include/sqlite
 )
 
-set(LIB_DIRS 
+set(LIB_DIRS
     ${SQLITE3_DIR}/lib
     $ENV{SQLITE3_DIR}/lib
     $ENV{SQLITE_DIR}/lib
@@ -42,7 +47,7 @@ find_library(SQLITE3_LIBRARY_DEBUG_NAME
         ${LIB_DIRS}
 )
 find_path(SQLITE3_LIBRARY_INCLUDE_PATH
-    NAME sqlite/sqlite3.h
+    NAME sqlite3.h
     HINTS
         ${INCLUDE_DIRS}
 )

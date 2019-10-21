@@ -104,6 +104,7 @@ public:
   */
   bool getPendingElevation(double& out_elevation, double* out_actualResolution = 0L);
 
+#ifdef USE_DEPRECATED_SIMDISSDK_API
   /**
    * @deprecated
    * Sets the maximum cache size for elevation tiles.  Forwards to ElevationQuery::setMaxTilesToCache().
@@ -113,6 +114,7 @@ public:
    * @param value Number of tiles to cache
    */
   SDK_DEPRECATE(void setMaxTilesToCache(int value), "Method is removed in newer osgEarth.");
+#endif
 
   /** Changes the MapNode that is associated with the query. */
   void setMap(const osgEarth::Map* map);

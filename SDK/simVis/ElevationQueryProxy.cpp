@@ -226,6 +226,7 @@ bool ElevationQueryProxy::getElevation(const osgEarth::GeoPoint& point, double& 
 #endif
 }
 
+#ifdef USE_DEPRECATED_SIMDISSDK_API
 void ElevationQueryProxy::setMaxTilesToCache(int value)
 {
 #if SDK_OSGEARTH_VERSION_LESS_THAN(1,6,0)
@@ -236,6 +237,7 @@ void ElevationQueryProxy::setMaxTilesToCache(int value)
     query_->setMaxTilesToCache(value);
 #endif
 }
+#endif
 
 void ElevationQueryProxy::setMap(const osgEarth::Map* map)
 {

@@ -624,7 +624,7 @@ View::View()
 
   // Install a viewport uniform on each camera, giving all shaders access
   // to the window size. The osgEarth::LineDrawable construct uses this.
-  thisCamera->addCullCallback(new osgEarth::InstallViewportSizeUniform());
+  thisCamera->addCullCallback(new osgEarth::InstallCameraUniform());
 
   // set global defaults for various scene elements
   osgEarth::GLUtils::setGlobalDefaults(thisCamera->getOrCreateStateSet());
@@ -1147,6 +1147,11 @@ void View::setLighting(bool value)
     simVis::setLighting(this->getCamera()->getOrCreateStateSet(), osg::StateAttribute::OFF);
   }
   lighting_ = value;
+}
+
+bool View::getLighting() const
+{
+  return lighting_;
 }
 
 double View::fovX() const

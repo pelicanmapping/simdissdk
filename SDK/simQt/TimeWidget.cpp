@@ -247,7 +247,7 @@ void TimeWidget::setTimeFormat(simCore::TimeFormat newFormat)
 void TimeWidget::setPrecision(unsigned int digits)
 {
   // save off the current time to force a redraw after setting the precision
-  simCore::TimeStamp currentTime = currentContainer_->timeStamp();
+  const simCore::TimeStamp& currentTime = currentContainer_->timeStamp();
   Q_FOREACH(TimeFormatContainer* w, containers_)
   {
     w->setPrecision(digits);
@@ -259,7 +259,7 @@ void TimeWidget::setTimeZone(simCore::TimeZone zone)
 {
   // Some formats use time zone when calculating time stamp.
   // Save off and reset to ensure time stays accurate and to force a redraw of the text
-  simCore::TimeStamp currentTime = currentContainer_->timeStamp();
+  const simCore::TimeStamp& currentTime = currentContainer_->timeStamp();
   Q_FOREACH(TimeFormatContainer* w, containers_)
   {
     w->setTimeZone(zone);
@@ -314,7 +314,7 @@ simCore::TimeStamp TimeWidget::timeRangeEnd() const
 
 bool TimeWidget::timeEnabled() const
 {
-  return !timeEnabled_;
+  return timeEnabled_;
 }
 
 void TimeWidget::setTimeEnabled(bool value)
@@ -343,6 +343,11 @@ void TimeWidget::setTimeEnabled(bool value)
       disabledLineEdit_ = new QLineEdit(tr("--------------------------------------"), this);
       disabledLineEdit_->setEnabled(false);
       disabledLineEdit_->setMinimumWidth(175);
+      // Set horizontal size policy to match the time line edit. This avoids
+      // potential resize problems when swapping between the two line edits.
+      QSizePolicy policy = disabledLineEdit_->sizePolicy();
+      policy.setHorizontalPolicy(QSizePolicy::Preferred);
+      disabledLineEdit_->setSizePolicy(policy);
     }
     disabledLineEdit_->setVisible(true);
     layout()->addWidget(disabledLineEdit_);

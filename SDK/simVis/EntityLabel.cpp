@@ -81,6 +81,7 @@ void EntityLabelNode::update(const simData::CommonPrefs& commonPrefs, const std:
     osgEarth::Style style;
     style.getOrCreate<osgEarth::TextSymbol>()->alignment() = static_cast<osgEarth::TextSymbol::Alignment>(labelPrefs.alignment());
     style.getOrCreate<osgEarth::TextSymbol>()->pixelOffset() = osg::Vec2s(labelPrefs.offsetx(), labelPrefs.offsety());
+    style.getOrCreate<osgEarth::TextSymbol>()->encoding() = osgEarth::TextSymbol::ENCODING_UTF8;
 
     label_ = new osgEarth::LabelNode("", style);
     label_->setDynamic(true);
@@ -148,6 +149,7 @@ void EntityLabelNode::update(const simData::CommonPrefs& commonPrefs, const std:
       osgEarth::TextSymbol* ts = style.getOrCreate<osgEarth::TextSymbol>();
       ts->alignment() = static_cast<osgEarth::TextSymbol::Alignment>(labelPrefs.alignment());
       ts->pixelOffset() = osg::Vec2s(labelPrefs.offsetx(), labelPrefs.offsety());
+      ts->encoding() = osgEarth::TextSymbol::ENCODING_UTF8;
 
       // text color:
       osg::Vec4 color = ColorUtils::RgbaToVec4(labelPrefs.color());

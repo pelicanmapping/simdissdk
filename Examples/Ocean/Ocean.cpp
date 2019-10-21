@@ -95,6 +95,7 @@ static simCore::Coordinate s_shipPosOri(simCore::COORD_SYS_LLA,
 static simData::ObjectId     s_shipId;
 
 
+#ifdef HAVE_TRITON_NODEKIT
 // cull callback that adds buoyancy to a platform
 // using its offset transform - this is not really
 // appropriate in the long run since the offset xform
@@ -173,6 +174,10 @@ public:
   void setEnabled(bool fl) {}
 #endif
 };
+#else
+// Provide a typedef for the callback since Triton isn't available
+typedef osg::NodeCallback PlatformBuoyancyCallback;
+#endif
 
 // An event handler to assist in testing Ocean
 struct MenuHandler : public osgGA::GUIEventHandler
@@ -373,6 +378,7 @@ namespace
     osg::observer_ptr<simVis::View> view_;
   };
 
+#ifdef HAVE_TRITON_NODEKIT
   /** Toggler for the Triton buoyancy simulation */
   class ToggleBuoyancySimulation : public ControlEventHandler
   {
@@ -388,6 +394,7 @@ namespace
   private:
     osg::ref_ptr<PlatformBuoyancyCallback> _cb;
   };
+#endif
 
 #ifdef HAVE_SILVERLINING_NODEKIT
   osg::ref_ptr<simUtil::SilverLiningSettingsAdapter> s_SlSettings = new simUtil::SilverLiningSettingsAdapter;
@@ -532,11 +539,14 @@ namespace
     opacitySlider->setHorizFill(true, 250.0f);
 
     // Sea level
+    if (simpleOceanLayer)
+    {
     ++row;
     grid->setControl(0, row, new LabelControl("Sea Level", TEXT_SIZE, WHITE));
     LabelControl* seaLevelLabel = grid->setControl(2, row, new LabelControl("0 m", TEXT_SIZE, WHITE));
     HSliderControl* seaLevelSlider = grid->setControl(1, row, new HSliderControl(-100.f, 100.f, 0.f, new ApplySeaLevel(simpleOceanLayer, seaLevelLabel)));
     seaLevelSlider->setHorizFill(true, 250.0f);
+    }
 
     // Sky lighting
     ++row;
@@ -751,6 +761,7 @@ namespace
   /** Factory for a sky node */
   SkyNode* makeSky(simVis::SceneManager* scene, bool useSilverLining, const std::string& slUser = "", const std::string& slLicense = "", const std::string& resourcePath = "")
   {
+#ifdef HAVE_SILVERLINING_NODEKIT
     if (useSilverLining)
     {
       osgEarth::SilverLining::SilverLiningOptions skyOptions;
@@ -763,18 +774,19 @@ namespace
       skyOptions.drawClouds() = true;
       skyOptions.cloudsMaxAltitude() = 100000.0;
 
-#ifdef HAVE_SILVERLINING_NODEKIT
       s_SlSettings->lensFlare()->set(true);
 
       // Configure clouds with the SilverLining callback settings
       s_SlSettings->addValue(s_CloudManager.get());
       return new SilverLining::SilverLiningNode(skyOptions, s_SlSettings.get());
-#else
-      return SkyNode::create(skyOptions);
-#endif /* HAVE_SILVERLINING_NODEKIT */
     }
-
+    else
+    {
+      return SkyNode::create();
+    }
+#else
     return SkyNode::create();
+#endif /* HAVE_SILVERLINING_NODEKIT */
   }
 
 #ifdef HAVE_TRITON_NODEKIT

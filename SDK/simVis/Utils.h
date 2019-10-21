@@ -253,7 +253,7 @@ namespace simVis
   * @return string  full path of file
   * @deprecated Use simVis::Registry::findFontFile() instead.
   */
-  SDKVIS_EXPORT std::string findFontFile(const std::string& fontFile);
+  SDK_DEPRECATE(SDKVIS_EXPORT std::string findFontFile(const std::string& fontFile), "Method will be removed in future SDK release.");
 #endif
 
   /**
