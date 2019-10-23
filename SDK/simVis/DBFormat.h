@@ -70,7 +70,7 @@ namespace simVis
   public: // Layer
 
     //! Establishes a connection to the database
-    virtual const Status& open();
+    virtual Status openImplementation();
 
     //! Creates a raster image for the given tile key
     virtual GeoImage createImageImplementation(const TileKey& key, ProgressCallback* progress) const;
@@ -116,7 +116,7 @@ namespace simVis
   public: // Layer
 
     //! Establishes a connection to the TMS repository
-    virtual const Status& open();
+    virtual Status openImplementation();
 
     //! Creates a heightfield for the given tile key
     virtual GeoHeightField createHeightFieldImplementation(const TileKey& key, ProgressCallback* progress) const;

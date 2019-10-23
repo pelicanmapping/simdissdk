@@ -367,9 +367,9 @@ void DBImageLayer::init()
   setTileSourceExpected(true);
 }
 
-const osgEarth::Status& DBImageLayer::open()
+osgEarth::Status DBImageLayer::openImplementation()
 {
-  return osgEarth::ImageLayer::open();
+  return osgEarth::ImageLayer::openImplementation();
 }
 
 osgEarth::GeoImage DBImageLayer::createImageImplementation(const osgEarth::TileKey& key, osgEarth::ProgressCallback* progress) const
@@ -424,13 +424,9 @@ void DBElevationLayer::init()
   setTileSourceExpected(true);
 }
 
-const osgEarth::Status& DBElevationLayer::open()
+osgEarth::Status DBElevationLayer::openImplementation()
 {
-  return osgEarth::ElevationLayer::open();
-  //osg::ref_ptr<const Profile> profile;
-  //osgEarth::Status status = driver_.open(getURL(), profile, dataExtents(), getReadOptions());
-  //setProfile(profile.get());
-  //return setStatus(status);
+  return osgEarth::ElevationLayer::openImplementation();
 }
 
 osgEarth::GeoHeightField DBElevationLayer::createHeightFieldImplementation(const osgEarth::TileKey& key, osgEarth::ProgressCallback* progress) const
