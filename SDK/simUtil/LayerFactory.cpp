@@ -114,9 +114,16 @@ ShapeFileLayerFactory::~ShapeFileLayerFactory()
 
 osgEarth::FeatureModelLayer* ShapeFileLayerFactory::load(const std::string& url) const
 {
-  osgEarth::FeatureModelLayer* layer = new osgEarth::FeatureModelLayer();
-  configureOptions(url, layer);
-  return layer;
+  osg::ref_ptr<osgEarth::FeatureModelLayer> layer = new osgEarth::FeatureModelLayer();
+  configureOptions(url, layer.get());
+
+  if (layer->getStatus().isError())
+  {
+    SIM_WARN << "ShapeFileLayerFactory::load(" << url << ") failed : " << layer->getStatus().message() << std::endl;
+    layer = NULL;
+  }
+
+  return layer.release();
 }
 
 void ShapeFileLayerFactory::configureOptions(const std::string& url, osgEarth::FeatureModelLayer* layer) const
@@ -128,11 +135,11 @@ void ShapeFileLayerFactory::configureOptions(const std::string& url, osgEarth::F
 
   osgEarth::OGRFeatureSource* ogr = new osgEarth::OGRFeatureSource();
   ogr->setURL(url);
+  ogr->open(); // not error-checking here; caller can do so at the layer level
   layer->setFeatureSource(ogr);
 
   layer->setAlphaBlending(true);
   layer->setEnableLighting(false);
-
 }
 
 void ShapeFileLayerFactory::setLineColor(const osg::Vec4f& color)
