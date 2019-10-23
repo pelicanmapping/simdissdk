@@ -78,10 +78,9 @@ int main(int argc, char** argv)
 
     if (isElevation)
     {
-      //TODO
-      //simVis::DBElevationLayer* layer = new simVis::DBElevationLayer();
-      //layer->setURL(token);
-      //map->addLayer(layer);
+      simVis::DBElevationLayer* layer = new simVis::DBElevationLayer();
+      layer->setURL(token);
+      map->addLayer(layer);
     }
     else
     {
