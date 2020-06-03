@@ -142,6 +142,9 @@ private:
   osg::ref_ptr<osg::Node> mapChangeListener_;
   /// object to asynchronously monitor the status of the elevation query result
   PrivateData* data_;
+
+  osgEarth::ElevationPool2::WorkingSet workingSet_;
+  osg::ref_ptr<osgEarth::AsyncElevationSampler> asyncSampler_;
 };
 
 }
