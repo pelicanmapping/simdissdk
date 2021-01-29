@@ -293,7 +293,7 @@ void simulate(simData::ObjectId hostId, std::vector<simData::ObjectId>& targetId
 
 int main(int argc, char **argv)
 {
-  int numBeams   = 10;
+  int numBeams   = 1;
   int numTargets = 100;
 
   // Set up the scene:

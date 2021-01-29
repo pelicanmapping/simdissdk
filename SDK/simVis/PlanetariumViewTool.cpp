@@ -23,6 +23,8 @@
 #include "osg/Depth"
 #include "osg/Geode"
 #include "osg/CullFace"
+#include "osg/io_utils"
+#include "osgDB/ReadFile"
 #include "osgEarth/LineDrawable"
 #include "osgEarth/AnnotationUtils"
 #include "simCore/Calc/Angle.h"
@@ -65,6 +67,13 @@ namespace
 //-------------------------------------------------------------------
 namespace simVis
 {
+
+  PlanetariumViewTool::BeamHistoryNode::BeamHistoryNode()
+  {
+  }
+
+
+
 PlanetariumViewTool::PlanetariumViewTool(PlatformNode* host) :
   host_(host),
   range_(1000.0),
@@ -89,7 +98,8 @@ PlanetariumViewTool::PlanetariumViewTool(PlatformNode* host) :
 
 osg::Node* PlanetariumViewTool::getNode() const
 {
-  return root_.get();
+  //return root_.get();
+  return myRoot_.get();
 }
 
 void PlanetariumViewTool::setRange(double range)
@@ -152,9 +162,13 @@ void PlanetariumViewTool::setDisplayTargetVectors(bool value)
 
 void PlanetariumViewTool::onInstall(const ScenarioManager& scenario)
 {
+  myRoot_ = new osg::Group;
+
   // create a node to track the position of the host:
   root_ = new LocatorNode(new Locator(host_->getLocator(), Locator::COMP_POSITION));
   root_->setName("Planetarium Tool Root Node");
+
+  myRoot_->addChild(root_.get());
 
   // build the dome
   updateDome_();
@@ -202,6 +216,7 @@ void PlanetariumViewTool::onUninstall(const ScenarioManager& scenario)
   root_ = nullptr;
   targets_ = nullptr;
   dome_ = nullptr;
+  myRoot_ = nullptr;
 }
 
 void PlanetariumViewTool::onEntityAdd(const ScenarioManager& scenario, EntityNode* entity)
@@ -224,14 +239,109 @@ void PlanetariumViewTool::onEntityRemove(const ScenarioManager& scenario, Entity
   }
 }
 
+simVis::Color
+randomColor()
+{
+  float r = (float)rand() / (float)RAND_MAX;
+  float g = (float)rand() / (float)RAND_MAX;
+  float b = (float)rand() / (float)RAND_MAX;
+  return simVis::Color(r, g, b, 0.1);
+}
+
 void PlanetariumViewTool::onUpdate(const ScenarioManager& scenario, const simCore::TimeStamp& timeStamp, const EntityVector& updates)
 {
   // update the fence
   fence_->setLocation(osg::Vec3d(0, 0, 0) * root_->getMatrix());
 
+
   // check any entity updates for positional changes
   for (EntityVector::const_iterator i = updates.begin(); i != updates.end(); ++i)
   {
+    BeamNode* beam = dynamic_cast<BeamNode*>(i->get());
+    if (beam)
+    {
+      const simData::BeamUpdate* lastUpdate = beam->getLastUpdateFromDS();
+
+      simData::BeamUpdate update(*lastUpdate);
+      update.set_range(range_);
+
+      simData::BeamPrefs prefs(beam->getPrefs());
+      prefs.set_blended(true);
+      //simVis::Color color = randomColor();
+      //prefs.mutable_commonprefs()->set_color(color.asABGR());
+      prefs.set_drawtype(simData::BeamPrefs_DrawType_COVERAGE);
+
+      BeamVolume* volume = new BeamVolume(prefs, update);
+
+      Locator* beamLocator = beam->getLocator();
+
+      // Get the origin locator, which is the parent
+      Locator* parentLocator = beamLocator->getParentLocator();
+
+      simCore::Vec3 pos, ori;
+      beamLocator->getLocalOffsets(pos, ori);
+
+      Locator* newBeamLocator = nullptr;
+
+      ResolvedPositionLocator* positionLocator = dynamic_cast<ResolvedPositionLocator*>(beamLocator);
+      if (positionLocator)
+      {
+        newBeamLocator = new ResolvedPositionLocator(parentLocator, Locator::COMP_ALL);
+      }
+      else
+      {
+        newBeamLocator = new ResolvedPositionOrientationLocator(parentLocator, Locator::COMP_ALL);
+      }
+
+      newBeamLocator->setLocalOffsets(pos, ori, update.time(), false);
+
+      LocatorNode* locatorNode = new LocatorNode(newBeamLocator);
+      locatorNode->addChild(volume);
+      //myRoot_->addChild(locatorNode);
+
+      BeamHistoryNode* beamHistory = nullptr;
+      auto historyItr = _history.find(beam->getId());
+      if (historyItr == _history.end())
+      {
+        beamHistory = new BeamHistoryNode();
+        myRoot_->addChild(beamHistory);
+        _history[beam->getId()] = beamHistory;
+      }
+      else
+      {
+        beamHistory = historyItr->second;
+      }
+
+      unsigned int maxChildren = 20;
+
+      if (beamHistory->getNumChildren() == maxChildren)
+      {
+        beamHistory->removeChild(0u);
+      }
+
+      beamHistory->addChild(locatorNode);
+
+      // Update the beam history nodes so they fade out
+      for (unsigned int i = 0; i < beamHistory->getNumChildren(); i++)
+      {
+
+        float totalAlpha = 1.0f / (float)beamHistory->getNumChildren();
+
+        float alpha = (1.0 + (float)i) / (float)beamHistory->getNumChildren();
+
+        BeamVolume* bv = dynamic_cast<BeamVolume*>(beamHistory->getChild(i)->asGroup()->getChild(0));
+        if (bv)
+        {
+          simData::BeamPrefs newPrefs(prefs);
+          //simVis::Color color = randomColor();
+          Color color = Color(prefs.commonprefs().color());
+          color.a() = alpha;
+          newPrefs.mutable_commonprefs()->set_color(color.asABGR());
+          bv->performInPlacePrefChanges(&prefs, &newPrefs);
+        }
+      }
+    }
+
     PlatformNode* platform = dynamic_cast<PlatformNode*>(i->get());
     if (!platform || platform == host_.get())
       continue;
@@ -240,6 +350,43 @@ void PlanetariumViewTool::onUpdate(const ScenarioManager& scenario, const simCor
     else
       targets_->remove(platform);
   }
+
+  /*
+  for (unsigned int i = 0; i < myRoot_->getNumChildren(); i++)
+  {
+    osg::Group* group = myRoot_.get()->getChild(i)->asGroup();
+    if (group)
+    {
+      BeamVolume* bv = dynamic_cast<BeamVolume*>(group->getChild(0));
+      if (bv)
+      {
+        simData::BeamPrefs lastPrefs;
+        lastPrefs.mutable_commonprefs()->set_color(randomColor().asABGR());
+        lastPrefs.set_drawtype(simData::BeamPrefs_DrawType_COVERAGE);
+        lastPrefs.set_blended(true);
+
+        simData::BeamPrefs prefs;
+        simVis::Color color = randomColor();
+        prefs.mutable_commonprefs()->set_color(color.asABGR());
+        prefs.set_drawtype(simData::BeamPrefs_DrawType_COVERAGE);
+        prefs.set_blended(true);
+
+        if (beamUpdate)
+        {
+          simData::BeamUpdate lastUpdate(*beamUpdate);
+          lastUpdate.set_range(0);
+
+          simData::BeamUpdate update(*beamUpdate);
+          update.set_range(range_);
+
+          bv->performInPlaceUpdates(&lastUpdate, &update);
+        }
+
+        bv->performInPlacePrefChanges(&lastPrefs, &prefs);
+      }
+    }
+  }
+  */
 }
 
 void PlanetariumViewTool::updateTargetGeometry(osg::MatrixTransform* mt,

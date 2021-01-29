@@ -41,6 +41,7 @@ namespace simVis
 class LocatorNode;
 class PlatformNode;
 class ScenarioManager;
+class BeamVolume;
 
 /**
  * PlanetariumViewTool is a tool that draws a translucent dome
@@ -49,6 +50,13 @@ class ScenarioManager;
  */
 class SDKVIS_EXPORT PlanetariumViewTool : public ScenarioTool
 {
+  class BeamHistoryNode : public osg::Group
+  {
+  public:
+    BeamHistoryNode();
+
+  };
+
 public:
   /**
    * Constructs a new dome/sensor viewing tool.
@@ -135,6 +143,10 @@ private:
 
   osg::observer_ptr<PlatformNode> host_;
   osg::observer_ptr<LocatorNode>  root_;
+  osg::observer_ptr<osg::Group> myRoot_;
+
+  std::map< simData::ObjectId, BeamHistoryNode*> _history;
+
   /// planetarium radius, in meters
   double                          range_;
   osg::Vec4f                      domeColor_;
